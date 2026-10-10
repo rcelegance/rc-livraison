@@ -77,7 +77,7 @@ const DEF={
  settings:{
   livreurs:[{id:'l1',nom:'Le livreur',tel:''},{id:'l2',nom:'Djamila',tel:''},{id:'l3',nom:'Sylvie',tel:''}],
   shop:[12.37429,-1.47157], shopOk:false, waBoutique:'22670801730', waDir:'22672052470', baseUrl:'',
-  quota:6, prime:300, coutKm:20, cyrRef:2.5, prixL:850, pleinF:3000, kwhF:120, tarif:{base:1000,seuil:10,tol:11,pas:5,plus:500}, motoPrix:850000, motoMois:12, vidF:3500, pin:'', gare:{client:1500,ticket:1000,societe:1000}, mesure:true, coutLivreurs:245000,
+  quota:6, prime:300, coutKm:20, cyrRef:2.5, prixL:850, pleinF:3000, kwhF:120, tarif:{base:1000,seuil:10,tol:11,pas:5,plus:500}, motoPrix:850000, motoMois:12, vidF:3500, pin:'', codeClient:false, ctrl:5, gare:{client:1500,ticket:1000,societe:1000}, mesure:true, coutLivreurs:245000,
   batteries:[
    {id:'e30',nom:'Moto électrique 30 Ah',ah:30,volt:76.8,km42:80,chargeA:8},
    {id:'e50',nom:'Moto électrique 50 Ah',ah:50,volt:76.8,km42:133,chargeA:8}
@@ -96,7 +96,7 @@ function load(){try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){S=null}
  if(!S.cyrus)S.cyrus={km:0,pleins:[],users:[],vid:null};
  if(S.settings.cyrRef==null)S.settings.cyrRef=2.5;
  if(!S.settings.prixL){S.settings.prixL=850;S.settings.pleinF=3000}
- const st0=S.settings;if(!st0.tarif)st0.tarif={base:1000,seuil:10,tol:11,pas:5,plus:500};if(!st0.kwhF)st0.kwhF=120;if(!st0.motoPrix){st0.motoPrix=850000;st0.motoMois=12}if(!st0.vidF)st0.vidF=3500;if(!st0.gare)st0.gare={client:1500,ticket:1000,societe:1000};if(st0.pin==null)st0.pin='';if(!st0.shop){st0.shop=[12.37429,-1.47157];st0.shopOk=false}if(st0.shopOk==null)st0.shopOk=true;if(!st0.waDir)st0.waDir='22672052470';
+ const st0=S.settings;if(!st0.tarif)st0.tarif={base:1000,seuil:10,tol:11,pas:5,plus:500};if(!st0.kwhF)st0.kwhF=120;if(!st0.motoPrix){st0.motoPrix=850000;st0.motoMois=12}if(!st0.vidF)st0.vidF=3500;if(st0.codeClient==null)st0.codeClient=false;if(!st0.ctrl)st0.ctrl=5;if(!st0.gare)st0.gare={client:1500,ticket:1000,societe:1000};if(st0.pin==null)st0.pin='';if(!st0.shop){st0.shop=[12.37429,-1.47157];st0.shopOk=false}if(st0.shopOk==null)st0.shopOk=true;if(!st0.waDir)st0.waDir='22672052470';
  S.repa=S.repa||[];S.epargne=S.epargne||[];if(!S.cat||S.catV!==2){S.cat=CAT0.map((c,i)=>({id:'c'+i,...c}));S.catV=2}
  for(const c0 of CAT0){const c=S.cat.find(x=>x.n===c0.n);if(c){if(!c.pv&&c0.pv)c.pv=c0.pv}else S.cat.push({id:uid(),...c0})}S.catLog=S.catLog||[];
  if(!S.elec){S.elec={bat:'e30',km:0,at:null,users:[],etat:{}}}
@@ -269,12 +269,12 @@ function creerBon(){const st=S.settings;
  const gare=draft.type==='gare',fm=gare?'gare':draft.fm;
  const L={id:uid(),type:draft.type,at:Date.now(),cl:draft.cl,tel:draft.tel,items,art:items.map(i=>i.a+(i.p?' ('+i.p+')':'')).join(', '),m:totalItems(items),fm,
   livreur:draft.livreur,veh:draft.veh,raison:draft.raison,code:String(Math.floor(1000+Math.random()*9000)),
-  cpos:parsePos(draft.pos),statut:'en_cours',alertes:[],remis:false,retour:false,controle:Math.random()<0.1};
+  cpos:parsePos(draft.pos),statut:'en_cours',alertes:[],remis:false,retour:false,controle:Math.random()<1/(st.ctrl||5),cc:!!st.codeClient};
  for(const it of items){const c=S.cat.find(x=>x.n.toLowerCase()===it.a.toLowerCase());
   if(c&&!c.pv&&it.x){c.pv=it.x;S.catLog.unshift({at:Date.now(),n:c.n,av:null,ap:it.x,par:'appris sur un bon'})}
   else if(!c&&it.x&&it.a!=='Modèle'){S.cat.push({id:uid(),n:it.a,pv:it.x,pa:null});S.catLog.unshift({at:Date.now(),n:it.a+' (nouveau)',av:null,ap:it.x,par:'appris sur un bon'})}}
  S.livs.unshift(L);save();
- const payload={i:L.id,y:L.type,c:L.cl,t:L.tel,it:items.map(i=>[i.a,i.p,i.x]),fm,tf:st.tarif,g:st.gare,l:liv(L.livreur).nom,v:vehNom(L.veh),s:st.shop,d:L.at,cp:L.cpos,w:st.waBoutique};
+ const payload={cc:L.cc?1:0,i:L.id,y:L.type,c:L.cl,t:L.tel,it:items.map(i=>[i.a,i.p,i.x]),fm,tf:st.tarif,g:st.gare,l:liv(L.livreur).nom,v:vehNom(L.veh),s:st.shop,d:L.at,cp:L.cpos,w:st.waBoutique};
  const code='RCB:'+enc(payload);
  const lien=st.baseUrl?st.baseUrl.replace(/#.*$/,'')+'#'+code:'';
  const fr=gare?'Envoi déjà payé':fm==='auto'?'Livraison : selon la distance (l\'appli calcule)':+fm===0?'Livraison OFFERTE':'Livraison : '+F(+fm);
@@ -282,7 +282,7 @@ function creerBon(){const st=S.settings;
  draft={type:'client',livreur:draft.livreur,veh:draft.veh,raison:'',items:[{a:'',p:'',x:''}],fm:'auto'};
  $('#app').innerHTML=`<div class="note ok">Bon créé pour <b>${esc(L.cl)}</b> : ${items.length} modèle(s), ${F(L.m)}. Envoyez dans l'ordre :</div>
  <a class="btn" href="${wa(liv(L.livreur).tel,txt)}" target="_blank" rel="noopener">1. Envoyer le bon à ${esc(liv(L.livreur).nom)}</a>${btnSms(liv(L.livreur).tel,txt)}
- ${!gare&&L.tel?`<a class="btn gold" href="${wa(telNorm(L.tel),`Bonjour, votre commande RC Elegance est en route 🛵\nVotre code de livraison : ${L.code}\nDonnez ce code au livreur seulement quand vous avez vos chaussures en main. Merci !`)}" target="_blank" rel="noopener">2. Envoyer le code ${L.code} au client</a>${btnSms(telNorm(L.tel),'RC Elegance : votre code de livraison est '+L.code+'. Donnez-le au livreur seulement quand vous avez vos chaussures en main.')}`:gare?'':`<div class="note">Code client : <b>${L.code}</b> (à donner au client par téléphone).</div>`}
+ ${!gare&&L.cc&&L.tel?`<a class="btn gold" href="${wa(telNorm(L.tel),`Bonjour, votre commande RC Elegance est en route 🛵\nVotre code de livraison : ${L.code}\nDonnez ce code au livreur seulement quand vous avez vos chaussures en main. Merci !`)}" target="_blank" rel="noopener">2. Envoyer le code ${L.code} au client</a>${btnSms(telNorm(L.tel),'RC Elegance : votre code de livraison est '+L.code+'. Donnez-le au livreur seulement quand vous avez vos chaussures en main.')}`:(gare||!L.cc)?'':`<div class="note">Code client : <b>${L.code}</b> (à donner au client par téléphone).</div>`}
  ${rappelVeh(L.veh,true)}<button class="btn ghost" id="nv">Nouveau bon</button>`;
  $('#nv').onclick=vBon;}
 function rappelVeh(v,shop){
@@ -328,7 +328,8 @@ function lireRetour(txt){const m=(txt||'').match(/RCR:([A-Za-z0-9_-]+)/);if(!m)r
  const its=L.items||[{a:L.art,p:L.pt,x:L.m}];L.kp=r.kp||(r.r==='T'||r.r==='G'?its.map((x,i)=>i):[]);
  L.vendu=L.kp.reduce((a,i)=>a+(its[i]?its[i].x:0),0);
  L.encaisse=L.type==='gare'?0:(r.e!=null?+r.e:L.vendu);
- if(L.type==='client'&&r.r!=='N'&&String(r.k)!==L.code)al.push(`Code client faux ou absent (saisi : ${r.k||'rien'}, attendu : ${L.code}). Livraison non validée tant que le client n'a pas confirmé.`);
+ if(L.cc&&L.type==='client'&&r.r!=='N'&&r.k&&String(r.k)!==L.code)al.push(`Code client faux (saisi : ${r.k}, attendu : ${L.code}).`);
+ if(L.cc&&L.type==='client'&&r.r!=='N'&&!r.k)al.push('Sans code client : le client n\'a pas donné son code.');
  if(L.cpos&&L.apos){const d=hav(L.cpos,L.apos)*1000;if(d>300)al.push(`Position douteuse : arrivée à ${Math.round(d)} m de la position envoyée par le client.`);
   kmA=Math.min(kmA,route(sh,L.cpos))||kmA}
  if(!L.apos)al.push('Pas de position GPS à l\'arrivée.');
@@ -411,7 +412,7 @@ function vLivreuse(){
   ${B.it.map((x,i)=>`<label style="display:flex;gap:12px;align-items:center;font-size:16px;color:var(--ink);padding:10px 0;border-bottom:1px solid var(--line);margin:0"><input type="checkbox" data-ck="${i}" ${coche[i]?'checked':''} style="width:26px;height:26px;flex:none"><span style="flex:1">${esc(x[0])}${x[1]?' · pt '+esc(x[1]):''}</span><b>${F(x[2])}</b></label>`).join('')}
   <div class="liv" style="margin-top:10px"><span>Chaussures gardées</span><b id="totc">${F(tot)}</b></div>
   <div class="liv"><span>Frais de livraison</span><b>${frLib}</b></div></div>
- <label>Code donné par le client (4 chiffres)</label><input id="kc" inputmode="numeric" maxlength="4" style="font-size:26px;letter-spacing:8px;text-align:center">
+ ${B.cc?`<label>Code donné par le client (4 chiffres)</label><input id="kc" inputmode="numeric" maxlength="4" style="font-size:26px;letter-spacing:8px;text-align:center">`:''}
  <button class="btn ok" id="vend" ${tot?'':'disabled style="opacity:.4"'}>Valider la vente</button>
  <button class="btn bad" id="rien">Rien acheté</button>
  <div id="pn" class="hide"><label><input type="checkbox" id="frq" style="width:auto"> Le client a quand même payé la livraison</label><label>Touchez la raison pour envoyer</label><div class="chips">${['Client absent','Pointure','Refus du modèle','A changé d\'avis','Injoignable'].map(x=>`<button class="chip" data-x="${x}">${x}</button>`).join('')}</div></div>`}
@@ -421,9 +422,9 @@ function vLivreuse(){
  document.querySelectorAll('[data-ck]').forEach(c=>c.onchange=()=>{coche[+c.dataset.ck]=c.checked;
   const t=B.it.reduce((a,x,i)=>a+(coche[i]?x[2]:0),0);$('#totc').textContent=F(t);const v=$('#vend');v.disabled=!t;v.style.opacity=t?1:.4});
  if($('#vend'))$('#vend').onclick=()=>{if(!coche.some(Boolean))return;
-  if($('#kc').value.trim().length!==4&&!confirm('Pas de code client à 4 chiffres : la vente sera signalée au Directeur. Continuer quand même ?'))return;envoyer({r:coche.every(Boolean)?'T':'P',k:$('#kc').value,kp:coche.map((c,i)=>c?i:-1).filter(i=>i>=0)})};
+  if(B.cc&&$('#kc').value.trim().length!==4&&!confirm('Le client n\'a pas donné son code ? La vente sera quand même enregistrée. Continuer ?'))return;envoyer({r:coche.every(Boolean)?'T':'P',k:$('#kc')?$('#kc').value:'',kp:coche.map((c,i)=>c?i:-1).filter(i=>i>=0)})};
  if($('#rien'))$('#rien').onclick=()=>$('#pn').classList.remove('hide');
- document.querySelectorAll('[data-x]').forEach(b=>b.onclick=()=>envoyer({r:'N',x:b.dataset.x,k:$('#kc').value,kp:[],frq:$('#frq').checked}));
+ document.querySelectorAll('[data-x]').forEach(b=>b.onclick=()=>envoyer({r:'N',x:b.dataset.x,k:$('#kc')?$('#kc').value:'',kp:[],frq:$('#frq').checked}));
  suivrePhoto('ph_gare');
  if($('#dep'))$('#dep').onclick=async()=>{const f=$('#ph_gare').files[0],num=$('#rc').value.trim();recuPhoto=null;
   if(!f&&!num){alert('Prenez la photo du reçu. En urgence (pas de photo possible), tapez au moins le numéro du reçu.');return}
@@ -662,6 +663,8 @@ function vReg(){const st=S.settings;
  <div class="row"><div><label>Quota / jour</label><input id="s_q" inputmode="numeric" value="${st.quota}"></div><div><label>Prime au-delà (F)</label><input id="s_p" inputmode="numeric" value="${st.prime}"></div></div>
  <div class="row"><div><label>Coût au km moto perso (F)</label><input id="s_k" inputmode="numeric" value="${st.coutKm}"></div><div><label>Coût livreurs / mois (F)</label><input id="s_c" inputmode="numeric" value="${st.coutLivreurs}"></div></div>
  <div class="row"><div><label>Cyrus : plein complet (F)</label><input id="s_pf" inputmode="numeric" value="${st.pleinF}"></div><div><label>Prix du litre (F)</label><input id="s_pl" inputmode="numeric" value="${st.prixL}"></div><div><label>Conso. (L/100 km)</label><input id="s_cr" inputmode="decimal" value="${st.cyrRef}"></div></div>
+ <label><input type="checkbox" id="s_cc" style="width:auto" ${st.codeClient?'checked':''}> Demander le code à 4 chiffres au client (contrôle renforcé)</label>
+ <label>Appel de contrôle : 1 livraison sur</label><input id="s_ct" inputmode="numeric" value="${st.ctrl||5}">
  <label><input type="checkbox" id="s_m" style="width:auto" ${st.mesure?'checked':''}> Mois de mesure (pas de prime)</label></div>
  <h2>Motos électriques</h2><div class="card">
  ${st.batteries.map((b,i)=>`<h3>${esc(b.nom)}</h3><div class="row"><div><label>Ampère-heure</label><input data-bah="${i}" inputmode="decimal" value="${b.ah}"></div><div><label>Km à 42 km/h</label><input data-bkm="${i}" inputmode="numeric" value="${b.km42}"></div></div>`).join('')}
@@ -677,7 +680,7 @@ function vReg(){const st=S.settings;
   document.querySelectorAll('[data-ln]').forEach(i=>st.livreurs[i.dataset.ln].nom=i.value.trim()||'Sans nom');
   document.querySelectorAll('[data-lt]').forEach(i=>st.livreurs[i.dataset.lt].tel=telNorm(i.value));
   st.livreurs=st.livreurs.filter(l=>l.nom!=='Sans nom');
-  st.quota=+$('#s_q').value||6;st.prime=+$('#s_p').value||0;st.coutKm=+$('#s_k').value||20;st.coutLivreurs=+$('#s_c').value||0;st.mesure=$('#s_m').checked;st.cyrRef=+String($('#s_cr').value).replace(',','.')||2.5;st.pleinF=+$('#s_pf').value||3000;st.tarif={base:+$('#t_b').value||1000,tol:+String($('#t_t').value).replace(',','.')||11,seuil:10,pas:+$('#t_k').value||5,plus:+$('#t_p').value||500};st.motoPrix=+$('#m_p').value||850000;st.motoMois=+$('#m_m').value||12;st.kwhF=+$('#s_kw').value||120;st.vidF=+$('#s_vd').value||3500;st.gare={client:+$('#g_c').value||1500,ticket:+$('#g_t').value||1000,societe:+$('#g_s').value||1000};if($('#s_pin').value.length>=4)st.pin=$('#s_pin').value;st.prixL=+$('#s_pl').value||850;
+  st.quota=+$('#s_q').value||6;st.prime=+$('#s_p').value||0;st.coutKm=+$('#s_k').value||20;st.coutLivreurs=+$('#s_c').value||0;st.mesure=$('#s_m').checked;st.codeClient=$('#s_cc').checked;st.ctrl=Math.max(2,+$('#s_ct').value||5);st.cyrRef=+String($('#s_cr').value).replace(',','.')||2.5;st.pleinF=+$('#s_pf').value||3000;st.tarif={base:+$('#t_b').value||1000,tol:+String($('#t_t').value).replace(',','.')||11,seuil:10,pas:+$('#t_k').value||5,plus:+$('#t_p').value||500};st.motoPrix=+$('#m_p').value||850000;st.motoMois=+$('#m_m').value||12;st.kwhF=+$('#s_kw').value||120;st.vidF=+$('#s_vd').value||3500;st.gare={client:+$('#g_c').value||1500,ticket:+$('#g_t').value||1000,societe:+$('#g_s').value||1000};if($('#s_pin').value.length>=4)st.pin=$('#s_pin').value;st.prixL=+$('#s_pl').value||850;
   document.querySelectorAll('[data-bah]').forEach(i=>st.batteries[i.dataset.bah].ah=+i.value||30);
   document.querySelectorAll('[data-bkm]').forEach(i=>st.batteries[i.dataset.bkm].km42=+i.value||80);
   st.batteries.forEach(b=>b.nom=`Moto électrique ${b.ah} Ah`);save();alert('Réglages enregistrés.');vReg()};
