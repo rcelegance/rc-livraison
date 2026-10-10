@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>RC Livraison</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#13294B">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
@@ -684,7 +688,7 @@ function vReg(){const st=S.settings;
 (function(){try{const hosted=/^https:$/.test(location.protocol)&&!/claude|anthropic/.test(location.hostname);
   if(hosted){if(!S.settings.baseUrl){S.settings.baseUrl=location.origin+location.pathname;save()}
    if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
-   const ln=document.createElement('link');ln.rel='manifest';ln.href='manifest.json';document.head.appendChild(ln)}}catch(e){}})();
+   }}catch(e){}})();
 (function(){const h=decodeURIComponent(location.hash||'');
  const b=h.match(/RCB:([A-Za-z0-9_-]+)/),r=h.match(/RCR:([A-Za-z0-9_-]+)/);
  if(b){try{bonRecu=dec(b[1]);tab='livreuse'}catch(e){}}

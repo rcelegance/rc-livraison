@@ -1,2 +1,2 @@
-{"name":"RC Livraison","short_name":"RC Livraison","start_url":"./","scope":"./","display":"standalone","background_color":"#ffffff","theme_color":"#13294B","lang":"fr",
- "icons":[{"src":"icon-192.png","sizes":"192x192","type":"image/png"},{"src":"icon-512.png","sizes":"512x512","type":"image/png"}]}
+{"id":"/rc-livraison/","name":"RC Livraison","short_name":"RC Livraison","description":"Livraisons Royaum' des Chaussures","start_url":"/rc-livraison/index.html","scope":"/rc-livraison/","display":"standalone","orientation":"portrait","background_color":"#ffffff","theme_color":"#13294B","lang":"fr",
+ "icons":[{"src":"/rc-livraison/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},{"src":"/rc-livraison/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"},{"src":"/rc-livraison/icon-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}]}
