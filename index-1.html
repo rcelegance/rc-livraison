@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RC Livraison</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#13294B">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#fff;--ink:#16203A;--mut:#5B6474;--navy:#13294B;--gold:#B8892B;--goldl:#F6EEDC;--line:#E3E6EC;--card:#fff;--soft:#F5F7FA;
+--ok:#1F7A4D;--warn:#B8620E;--bad:#B42318;--okl:#E6F4EC;--warnl:#FCF0E2;--badl:#FDECEA}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0F1626;--ink:#E9ECF2;--mut:#A3ACBD;--navy:#9DB4E0;--gold:#D9AE52;--goldl:#2A2414;--line:#283149;--card:#151E31;--soft:#1A2338;--okl:#12301F;--warnl:#33240F;--badl:#381614}}
+:root[data-theme="dark"]{--bg:#0F1626;--ink:#E9ECF2;--mut:#A3ACBD;--navy:#9DB4E0;--gold:#D9AE52;--goldl:#2A2414;--line:#283149;--card:#151E31;--soft:#1A2338;--okl:#12301F;--warnl:#33240F;--badl:#381614}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 Sora,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{padding:18px 16px 8px;max-width:720px;margin:auto;display:flex;align-items:center;gap:12px}
+.logo{width:42px;height:42px;border-radius:50%;border:2px solid var(--gold);display:grid;place-items:center;font-weight:700;color:var(--navy);font-size:14px}
+h1{font-size:20px;margin:0;color:var(--navy)}header small{color:var(--mut);display:block;font-size:12px}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+nav div{max-width:720px;margin:auto;display:flex;overflow-x:auto}
+nav button{flex:1;min-width:76px;background:none;border:0;padding:12px 6px;font:600 13px Sora,sans-serif;color:var(--mut);border-bottom:3px solid transparent}
+nav button.on{color:var(--navy);border-color:var(--gold)}
+main{max-width:720px;margin:auto;padding:14px 16px 60px}
+h2{font-size:17px;color:var(--navy);margin:20px 0 8px}h3{font-size:15px;margin:14px 0 6px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:10px 0}
+label{display:block;font-size:13px;color:var(--mut);margin:10px 0 4px}
+input,select,textarea{width:100%;font:16px Sora,sans-serif;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--soft);color:var(--ink)}
+textarea{min-height:80px}
+.row{display:flex;gap:10px}.row>*{flex:1}
+.btn{display:block;width:100%;border:0;border-radius:12px;padding:14px;font:700 16px Sora,sans-serif;margin-top:10px;background:var(--navy);color:#fff}
+:root[data-theme="dark"] .btn,.dk .btn{color:#0F1626}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn{color:#0F1626}}
+.btn.gold{background:var(--gold);color:#fff}.btn.ghost{background:none;border:1.5px solid var(--navy);color:var(--navy)}
+.btn.ok{background:var(--ok);color:#fff}.btn.warn{background:var(--warn);color:#fff}.btn.bad{background:var(--bad);color:#fff}
+.btn.sm{display:inline-block;width:auto;padding:8px 12px;font-size:13px;margin:6px 6px 0 0}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--line);border-radius:999px;padding:9px 14px;font:600 14px Sora,sans-serif;background:var(--card);color:var(--ink)}
+.chip.on{border-color:var(--gold);background:var(--goldl);color:var(--navy)}
+.mut{color:var(--mut);font-size:13px}
+.tag{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;background:var(--soft);color:var(--mut)}
+.tag.ok{background:var(--okl);color:var(--ok)}.tag.warn{background:var(--warnl);color:var(--warn)}.tag.bad{background:var(--badl);color:var(--bad)}
+.note{border-left:4px solid var(--gold);background:var(--goldl);padding:10px 12px;border-radius:8px;font-size:14px;margin:10px 0}
+.note.bad{border-color:var(--bad);background:var(--badl)}.note.ok{border-color:var(--ok);background:var(--okl)}.note.warn{border-color:var(--warn);background:var(--warnl)}
+.liv{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.liv b{display:block}
+.tbl{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px}
+td,th{padding:7px 6px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}th{color:var(--mut);font-weight:600;font-size:12px}
+td.n,th.n{text-align:right}
+/* batterie : élément phare */
+.bat{display:flex;gap:16px;align-items:center}
+.cell{width:64px;height:120px;border:3px solid var(--navy);border-radius:10px;position:relative;flex:none;overflow:hidden;background:var(--soft)}
+.cell:before{content:"";position:absolute;top:-3px;left:20px;width:18px;height:6px;background:var(--navy);border-radius:0 0 3px 3px}
+.fill{position:absolute;left:0;right:0;bottom:0;transition:height .6s}
+.cell i{position:absolute;left:0;right:0;border-top:1.5px dashed var(--ink);opacity:.45}
+.pct{font-size:34px;font-weight:700;line-height:1}
+.big{font-size:22px;font-weight:700;color:var(--navy)}
+.kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-top:8px}
+.kpi div{background:var(--soft);border-radius:10px;padding:10px}.kpi b{display:block;font-size:18px;color:var(--navy)}.kpi span{font-size:12px;color:var(--mut)}
+.hide{display:none}
+.miss{border-color:var(--bad)!important;background:var(--badl)!important}
+.chips.miss{outline:2px solid var(--bad);outline-offset:4px;border-radius:12px}
+.loc{border:2px solid var(--gold);background:var(--goldl)}
+.loc h3{margin-top:0;color:var(--navy)}
+.recap{border:2px solid var(--ok)}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+</style>
+</head>
+<body>
+<header><div class="logo">RC</div><div><h1>RC Livraison</h1><small id="who">Royaum' des Chaussures</small></div><button class="btn sm ghost" id="lock" style="margin-left:auto"></button></header>
+<nav><div id="tabs"></div></nav>
+<main id="app"></main>
+
+<script>
+/* ===================== Données ===================== */
+const KEY='rcliv_v1';
+const DEF={
+ settings:{
+  livreurs:[{id:'l1',nom:'Le livreur',tel:''},{id:'l2',nom:'Djamila',tel:''},{id:'l3',nom:'Sylvie',tel:''}],
+  shop:[12.37429,-1.47157], shopOk:false, waBoutique:'22670801730', waDir:'22672052470', baseUrl:'',
+  quota:6, prime:300, coutKm:20, cyrRef:2.5, prixL:850, pleinF:3000, kwhF:120, tarif:{base:1000,seuil:10,tol:11,pas:5,plus:500}, motoPrix:850000, motoMois:12, vidF:3500, pin:'', codeClient:false, ctrl:5, gare:{client:1500,ticket:1000,societe:1000}, mesure:true, coutLivreurs:245000,
+  batteries:[
+   {id:'e30',nom:'Moto électrique 30 Ah',ah:30,volt:76.8,km42:80,chargeA:8},
+   {id:'e50',nom:'Moto électrique 50 Ah',ah:50,volt:76.8,km42:133,chargeA:8}
+  ]
+ },
+ bat:{e30:{pct:100,km:0,odoRef:null,at:null},e50:{pct:100,km:0,odoRef:null,at:null}},
+ cyrus:{km:0,pleins:[],users:[],vid:null}, repa:[], epargne:[],
+ livs:[]
+};
+const CAT0=[{"n": "Adidas", "pa": null, "pv": null}, {"n": "Ana Galia", "pa": 10000, "pv": null}, {"n": "Babauche", "pa": 8500, "pv": 14000}, {"n": "Basket enfant", "pa": 2500, "pv": null}, {"n": "Basket Prama", "pa": 3250, "pv": 6000}, {"n": "Basket Promo", "pa": 3250, "pv": 5000}, {"n": "Berlutie de Paris", "pa": 13000, "pv": 15000}, {"n": "Bouk Shoes", "pa": 12500, "pv": 18000}, {"n": "Bromey", "pa": 12000, "pv": null}, {"n": "Ceinture cuir", "pa": 6500, "pv": 10000}, {"n": "Ceinture simple", "pa": 3000, "pv": 6000}, {"n": "Celio", "pa": 13000, "pv": null}, {"n": "Celio montante", "pa": 12000, "pv": null}, {"n": "Chamo", "pa": 8500, "pv": 15000}, {"n": "Chausse-pied", "pa": 750, "pv": null}, {"n": "Chaussette", "pa": 300, "pv": null}, {"n": "Cirage", "pa": 400, "pv": 750}, {"n": "Gellegien", "pa": 10000, "pv": 15000}, {"n": "Gemine Quality", "pa": null, "pv": null}, {"n": "Grosse Mocassin", "pa": 14000, "pv": 20000}, {"n": "Grosse Pointure", "pa": 6000, "pv": 12000}, {"n": "H Remaw", "pa": 12500, "pv": 20000}, {"n": "IM Shoes montante", "pa": 13000, "pv": null}, {"n": "IM Shoes soulier", "pa": 13000, "pv": null}, {"n": "Jaguar", "pa": 9000, "pv": null}, {"n": "JMS", "pa": 7500, "pv": 15000}, {"n": "John Foster", "pa": 13000, "pv": 20000}, {"n": "John Foster montant", "pa": 13000, "pv": null}, {"n": "Kosta", "pa": 10000, "pv": null}, {"n": "Lacoste", "pa": 6000, "pv": null}, {"n": "Liba Fashion", "pa": 6000, "pv": null}, {"n": "Mocassin Sulti", "pa": 11000, "pv": null}, {"n": "Mocassin Turquie", "pa": 15000, "pv": 20000}, {"n": "New Fashion", "pa": null, "pv": null}, {"n": "Nike", "pa": 11000, "pv": 17500}, {"n": "Novalion", "pa": 12000, "pv": 18000}, {"n": "Nu pied cuir", "pa": 13000, "pv": 17500}, {"n": "Nu pied Hazana", "pa": 7000, "pv": 12000}, {"n": "Nu pied lion", "pa": 8500, "pv": 15000}, {"n": "Nu pied Timberland", "pa": null, "pv": null}, {"n": "Nu pied Zaza", "pa": 3500, "pv": 5000}, {"n": "Nulimsen", "pa": 12000, "pv": 17500}, {"n": "OGGI", "pa": 8000, "pv": null}, {"n": "Original", "pa": 6000, "pv": 10000}, {"n": "Pierre Cardin", "pa": 10000, "pv": 15000}, {"n": "Présidentielle bout pointu", "pa": 11500, "pv": null}, {"n": "Présidentielle bout rond", "pa": 11500, "pv": null}, {"n": "RC Elegance", "pa": 11500, "pv": null}, {"n": "RC Moccasin", "pa": 11500, "pv": null}, {"n": "RC Soulier boucle", "pa": 12000, "pv": null}, {"n": "RC Soulier jolie gomme", "pa": 13000, "pv": 17500}, {"n": "Retos", "pa": 11000, "pv": 18000}, {"n": "Ripano", "pa": 11500, "pv": 15000}, {"n": "Sebago", "pa": 5750, "pv": null}, {"n": "SLmu+3", "pa": 10000, "pv": null}, {"n": "Timberland soulier", "pa": null, "pv": null}, {"n": "TOD", "pa": 9000, "pv": null}, {"n": "Vrai cuir", "pa": 7000, "pv": null}, {"n": "Weston", "pa": 12000, "pv": null}, {"n": "Louis Vuitton", "pa": 12000, "pv": 20000}, {"n": "Oristano vrai cuir", "pa": 9500, "pv": 13000}];
+let S;
+function load(){try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){S=null}
+ if(!S||!S.settings){S=JSON.parse(JSON.stringify(DEF))}
+ for(const b of S.settings.batteries){if(!S.bat[b.id])S.bat[b.id]={pct:100,km:0,at:null}}
+ for(const k in S.bat){const x=S.bat[k];x.sessions=x.sessions||[];x.users=x.users||[];if(x.plug===undefined)x.plug=null}
+ if(!S.cyrus)S.cyrus={km:0,pleins:[],users:[],vid:null};
+ if(S.settings.cyrRef==null)S.settings.cyrRef=2.5;
+ if(!S.settings.prixL){S.settings.prixL=850;S.settings.pleinF=3000}
+ const st0=S.settings;if(!st0.tarif)st0.tarif={base:1000,seuil:10,tol:11,pas:5,plus:500};if(!st0.kwhF)st0.kwhF=120;if(!st0.motoPrix){st0.motoPrix=850000;st0.motoMois=12}if(!st0.vidF)st0.vidF=3500;if(st0.codeClient==null)st0.codeClient=false;if(!st0.ctrl)st0.ctrl=5;if(!st0.gare)st0.gare={client:1500,ticket:1000,societe:1000};if(st0.pin==null)st0.pin='';if(!st0.shop){st0.shop=[12.37429,-1.47157];st0.shopOk=false}if(st0.shopOk==null)st0.shopOk=true;if(!st0.waDir)st0.waDir='22672052470';
+ S.repa=S.repa||[];S.epargne=S.epargne||[];if(!S.cat||S.catV!==2){S.cat=CAT0.map((c,i)=>({id:'c'+i,...c}));S.catV=2}
+ for(const c0 of CAT0){const c=S.cat.find(x=>x.n===c0.n);if(c){if(!c.pv&&c0.pv)c.pv=c0.pv}else S.cat.push({id:uid(),...c0})}S.catLog=S.catLog||[];
+ if(!S.elec){S.elec={bat:'e30',km:0,at:null,users:[],etat:{}}}
+ for(const b of S.settings.batteries)if(!S.elec.etat[b.id])S.elec.etat[b.id]=b.id===S.elec.bat?'montee':'pleine';
+ for(const l of S.livs)if(l.veh==='e30'||l.veh==='e50')l.veh='elec';}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+load();
+
+/* ===================== Outils ===================== */
+const $=s=>document.querySelector(s);
+const F=n=>Math.round(n||0).toLocaleString('fr-FR').replace(/\u202f|\u00a0/g,' ')+' F';
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+const enc=o=>btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+const dec=s=>{s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return JSON.parse(decodeURIComponent(escape(atob(s))))};
+function hav(a,b){const R=6371,r=x=>x*Math.PI/180;const dl=r(b[0]-a[0]),dn=r(b[1]-a[1]);
+ const h=Math.sin(dl/2)**2+Math.cos(r(a[0]))*Math.cos(r(b[0]))*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
+const route=(a,b)=>hav(a,b)*1.35; // estimation par la route : ligne droite + 35 %
+function frais(k,t=S.settings.tarif){if(k<=t.tol)return t.base;return t.base+t.plus*Math.ceil((k-t.seuil)/t.pas)}
+function grille(){const t=S.settings.tarif,out=[[`0 à ${t.tol} km`,t.base]];for(let a=t.seuil,i=1;i<=5;i++,a+=t.pas){out.push([`${i===1?t.tol:a} à ${a+t.pas} km`,t.base+t.plus*i])}return out}
+function coutKmVeh(v){const st=S.settings;if(v==='cyrus')return st.prixL*st.cyrRef/100;if(v==='elec')return whKm(batMontee(),45)/1000*st.kwhF;if(v==='perso')return st.coutKm;return 0}
+const coutCourse=l=>l.cout!=null?l.cout:Math.round((l.kmAR||0)*coutKmVeh(l.veh));
+function parsePos(t){if(!t)return null;let s=String(t);try{s=decodeURIComponent(s.replace(/\+/g,' '))}catch(e){}const m=s.match(/(-?\d{1,2}\.\d{3,})\s*,\s*(-?\d{1,3}\.\d{3,})/);return m?[+m[1],+m[2]]:null}
+function gps(){return new Promise((ok,ko)=>{if(!navigator.geolocation)return ko(new Error('GPS indisponible sur ce téléphone'));
+ navigator.geolocation.getCurrentPosition(p=>ok([p.coords.latitude,p.coords.longitude,p.coords.accuracy]),e=>ko(e),{enableHighAccuracy:true,timeout:20000,maximumAge:0})})}
+const sms=(num,txt)=>'sms:'+(num?'+'+String(num).replace(/\D/g,''):'')+'?body='+encodeURIComponent(txt);
+const btnSms=(num,txt,lib='Envoyer par SMS (sans Internet)')=>`<a class="btn sm ghost" style="display:block;text-align:center" href="${sms(num,txt)}">${lib}</a>`;
+const wa=(num,txt)=>'https://wa.me/'+(num||'').replace(/\D/g,'')+'?text='+encodeURIComponent(txt);
+const fmtD=t=>t?new Date(t).toLocaleString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
+const liv=id=>S.settings.livreurs.find(l=>l.id===id)||{nom:'?',tel:''};
+function vehs(){return [{id:'cyrus',nom:'Moto Cyrus'},{id:'elec',nom:'Moto électrique ('+batMontee().ah+' Ah)'},{id:'perso',nom:'Moto perso'}]}
+const vehNom=id=>(vehs().find(v=>v.id===id)||{nom:id}).nom;
+function telNorm(t){t=(t||'').replace(/\D/g,'');if(t.length===8)t='226'+t;return t}
+
+/* ===================== Photos des reçus (archive dans le téléphone) ===================== */
+function idb(){return new Promise((ok,ko)=>{if(!window.indexedDB)return ko(new Error('no idb'));const r=indexedDB.open('rcliv_photos',1);
+ r.onupgradeneeded=()=>r.result.createObjectStore('p');r.onsuccess=()=>ok(r.result);r.onerror=()=>ko(r.error)})}
+async function photoPut(k,blob){const d=await idb();return new Promise((ok,ko)=>{const t=d.transaction('p','readwrite');t.objectStore('p').put(blob,k);t.oncomplete=ok;t.onerror=()=>ko(t.error)})}
+async function photoGet(k){const d=await idb();return new Promise(ok=>{const q=d.transaction('p').objectStore('p').get(k);q.onsuccess=()=>ok(q.result||null);q.onerror=()=>ok(null)})}
+function compresser(file,max=1000){return new Promise((ok,ko)=>{const img=new Image(),u=URL.createObjectURL(file);
+ img.onload=()=>{const r=Math.min(1,max/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*r);c.height=Math.round(img.height*r);
+  c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(b=>b?ok(b):ko(new Error('photo')),'image/jpeg',0.65)};
+ img.onerror=()=>ko(new Error('photo illisible'));img.src=u})}
+async function archiver(file,info){const b=await compresser(file);const k='r'+uid();await photoPut(k,b);
+ S.recus=S.recus||[];S.recus.unshift({k,at:Date.now(),...info});save();return k}
+const champPhoto=(id,lib='📷 Photo du reçu')=>`<label class="btn ghost" style="text-align:center;cursor:pointer">${lib}<input type="file" accept="image/*" capture="environment" id="${id}" style="display:none"></label><div class="mut" id="${id}_ok"></div>`;
+function suivrePhoto(id){const i=$('#'+id);if(i)i.onchange=()=>{const z=$('#'+id+'_ok');if(z)z.textContent=i.files[0]?'✓ Photo prise':''}}
+
+/* ===================== Batteries ===================== */
+// Consommation Wh/km selon la vitesse, terrain plat : calée sur 80 km à 42 km/h pour la 30 Ah
+function whKm(b,v){const c42=b.ah*b.volt/b.km42;return c42*(0.6+0.4*(v/42)**2)}
+const wh=b=>b.ah*b.volt;
+const rangeAt=(b,v)=>wh(b)/whKm(b,v);
+const VREF=45; // vitesse de calcul : 45 km/h (maximum 50)
+function batMontee(){return S.settings.batteries.find(b=>b.id===S.elec.bat)||S.settings.batteries[0]}
+function kmRest(v=VREF){const b=batMontee();return Math.max(0,(wh(b)-S.elec.km*whKm(b,VREF))/whKm(b,v))}
+function batPct(){const b=batMontee();return Math.max(0,100-S.elec.km*whKm(b,VREF)/wh(b)*100)}
+function conseil(){const r=Math.floor(kmRest());
+ if(r<=10)return{c:'bad',t:'Changer de batterie',d:`Il reste environ ${r} km à 45 km/h. La moto ne sort plus : mettre la batterie pleine (ou prendre la Cyrus) et brancher celle-ci.`};
+ if(r<=20)return{c:'warn',t:'Batterie faible',d:`Il reste environ ${r} km à 45 km/h. Seulement une course proche (moins de ${Math.max(0,Math.floor((r-10)/1.15))} km aller-retour), puis changer la batterie au retour.`};
+ return{c:'ok',t:'Prête',d:`Il reste environ ${r} km à 45 km/h.`}}
+function couleur(r){return r<=10?'var(--bad)':r<=20?'var(--warn)':'var(--ok)'}
+function checkCourse(veh,kmAR){if(veh!=='elec'||!kmAR)return null;const r=kmRest(),reste=r-kmAR*1.15;
+ if(reste<10)return{c:'bad',t:`Batterie insuffisante : course ≈ ${kmAR.toFixed(1)} km aller-retour, il reste ${Math.floor(r)} km. Changer la batterie ou prendre la Cyrus.`};
+ if(reste<=20)return{c:'warn',t:`Course possible. Au retour il restera environ ${Math.floor(reste)} km : changer la batterie.`};
+ return{c:'ok',t:`Batterie OK : il restera environ ${Math.floor(reste)} km après cette course.`}}
+
+/* ===================== Période 15 → 14 ===================== */
+function periode(ref){const d=ref?new Date(ref):new Date();let y=d.getFullYear(),m=d.getMonth();if(d.getDate()<15)m--;
+ const deb=new Date(y,m,15),fin=new Date(y,m+1,15);return{deb:+deb,fin:+fin,lib:`15/${String(deb.getMonth()+1).padStart(2,'0')} au 14/${String(fin.getMonth()+1).padStart(2,'0')}/${fin.getFullYear()}`}}
+
+/* ===================== Navigation ===================== */
+const TABS=[['bon','Nouveau bon'],['cours','En cours'],['art','Articles'],['livreuse','Livreuse'],['bat','Véhicules'],['caisse','Caisse moto'],['recu','Recevoir'],['bilan','Bilan'],['reg','Réglages']];
+let tab='bon',bonRecu=null,pasteMsg='',dir=false;
+let role=(()=>{try{return localStorage.getItem('rcliv_role')}catch(e){return null}})();
+const ACCES={livreuse:['livreuse'],boutique:['bon','cours','art','bat','caisse'],directeur:[]};
+const permis=()=>dir?TABS.map(t=>t[0]):(ACCES[role]||[]);
+function nav(){ $('#tabs').innerHTML=TABS.filter(([k])=>permis().includes(k)).map(([k,l])=>`<button class="${k===tab?'on':''}" data-t="${k}">${l}</button>`).join('');
+ document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{tab=b.dataset.t;render();scrollTo(0,0)})}
+function render(){
+ $('#lock').textContent=dir?'Verrouiller':'Directeur';
+ $('#who').textContent=dir?'Mode Directeur : tout est ouvert':role==='livreuse'?'Téléphone de livreur':role==='boutique'?'Téléphone de la boutique':'Royaum\' des Chaussures';
+ $('#lock').onclick=()=>{if(dir){dir=false;render()}else ouvrirDir()};
+ if(!role&&!dir)return vRole();
+ if(role==='directeur'&&!dir)return ouvrirDir();
+ if(!permis().includes(tab))tab=permis()[0];
+ nav();({bon:vBon,cours:vCours,livreuse:vLivreuse,art:vArt,bat:vBat,caisse:vCaisse,recu:vRecu,bilan:vBilan,reg:vReg})[tab]()}
+
+function vRole(){$('#tabs').innerHTML='';
+ $('#app').innerHTML=`<h2>Ce téléphone sert à qui ?</h2><p class="mut">À choisir une seule fois. Seul le Directeur peut changer ce choix ensuite.</p>
+ <button class="btn" data-ro="boutique">Téléphone de la boutique (caisse)</button><p class="mut">Créer les bons, valider les retours, l'argent remis, les pleins, les batteries, les dépenses.</p>
+ <button class="btn gold" data-ro="livreuse">Téléphone d'un livreur</button><p class="mut">Ouvrir le bon et valider chez le client. Rien d'autre.</p>
+ <button class="btn ghost" data-ro="directeur">Téléphone du Directeur (à distance)</button><p class="mut">Recevoir le point envoyé par la boutique et voir le bilan, les alertes, les véhicules. Protégé par le code Directeur.</p>`;
+ document.querySelectorAll('[data-ro]').forEach(b=>b.onclick=()=>{role=b.dataset.ro;try{localStorage.setItem('rcliv_role',role)}catch(e){}if(role==='directeur')return ouvrirDir();tab=permis()[0];render()})}
+function ouvrirDir(){const st=S.settings;
+ $('#tabs').innerHTML='';
+ $('#app').innerHTML=`<h2>Accès Directeur</h2><div class="card">${st.pin?'<label>Code Directeur</label>':'<label>Choisissez un code Directeur (4 à 6 chiffres)</label>'}
+ <input id="pin" type="password" inputmode="numeric" maxlength="6" style="font-size:24px;letter-spacing:6px;text-align:center">
+ ${st.pin?'':'<label>Retapez le code</label><input id="pin2" type="password" inputmode="numeric" maxlength="6" style="font-size:24px;letter-spacing:6px;text-align:center">'}
+ <button class="btn" id="pok">Ouvrir</button><button class="btn ghost" id="pno">Retour</button><div id="pm"></div></div>`;
+ $('#pno').onclick=()=>{if(role==='directeur'){role=null;try{localStorage.removeItem('rcliv_role')}catch(e){}}render()};
+ $('#pok').onclick=()=>{const v=$('#pin').value;
+  if(!st.pin){if(v.length<4||v!==$('#pin2').value){$('#pm').innerHTML='<div class="note bad">Les deux codes doivent être identiques (4 chiffres minimum).</div>';return}st.pin=v;save()}
+  else if(v!==st.pin){$('#pm').innerHTML='<div class="note bad">Code faux.</div>';return}
+  dir=true;tab=role==='directeur'?'recu':'bilan';render()}}
+
+/* ===================== Prix de la boutique (catalogue de la caisse « Royaum' des Comptes ») ===================== */
+const nz=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[’']/g,' ').replace(/[^a-z0-9+ ]/g,' ').replace(/\s+/g,' ').trim();
+const km1=k=>k.toFixed(1).replace('.',',');
+const cap=s=>String(s||'').trim().split(' ').filter(Boolean).map(w=>w[0].toUpperCase()+w.slice(1)).join(' ');
+function catCaisse(){try{const c=JSON.parse(localStorage.getItem('rdc:cat'));return Array.isArray(c)?c:[]}catch(e){return[]}}
+function catNoms(){const m=new Map();for(const c of catCaisse())if(c&&c.n)m.set(nz(c.n),c.n);for(const c of S.cat)if(!m.has(nz(c.n)))m.set(nz(c.n),c.n);return [...m.values()].sort((a,b)=>a.localeCompare(b,'fr'))}
+// Mêmes règles que la caisse : prix fixe (ou promo) et grille d'avantages envoyée par le Directeur (champs bon / vip)
+const tier=g=>g>=7500?2000:g>=6500?1500:g>=5500?1000:g>=4500?500:0;
+const vipT=g=>g<4500?0:Math.max(tier(g),Math.min(3000,Math.floor((g-4000)/500)*500));
+const ACC=['chaussette','cirage','chausse-pied','ceinture cuir','ceinture simple'].map(nz);
+const isAccN=n=>ACC.includes(nz(n));
+function prixBoutique(n){const k=nz(n);if(!k)return null;const c=catCaisse().find(x=>x&&nz(x.n)===k);
+ if(c){const pv=+(c.promo||c.p)||0;if(pv>0)return{pv,promo:!!c.promo,bon:+c.bon||0,vip:+c.vip||0,src:'caisse'}}
+ const l=S.cat.find(x=>nz(x.n)===k);if(!l||!l.pv)return null;const g=l.pa?l.pv-l.pa:0;
+ return{pv:+l.pv,promo:false,bon:g?tier(g):0,vip:g?vipT(g):0,src:'livraison'}}
+// Niveau du client, lu dans les ventes de la caisse (reçus envoyés depuis 1 an) — même calcul que la caisse
+function niveauClient(tel){const t=telNorm(tel);if(t.length<11)return null;let n=0,any=0;const lim=new Date();lim.setDate(lim.getDate()-365);const L=lim.toLocaleDateString('fr-CA');
+ for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(!k||!k.startsWith('rdc:jour:')||k.slice(9)<L)continue;let o=null;try{o=JSON.parse(localStorage.getItem(k))}catch(e){}
+  ((o&&o.ventes)||[]).forEach(v=>{if(v.client===t&&!v.acc&&(v.recu==='envoye'||v.recu==='sms')){any+=v.qte;if(v.prixVendu>=15000)n+=v.qte}})}
+ return any?{lvl:n>=4?'royal':'fidele',n}:{lvl:'non',n:0}}
+function autoFid(){if(draft.fidMan)return;const nv=niveauClient(draft.tel);draft.fid=nv?nv.lvl:'non';draft.fidN=nv?nv.n:0;draft.fidAuto=!!(nv&&nv.lvl!=='non')}
+// Un seul avantage par paire, hors promo et accessoires : ancien client = toutes ses paires ; nouveau client = toutes sauf la première
+function prixDraft(){autoFid();const mode=draft.fid||'non';let shoes=0;
+ for(const it of draft.items){const pb=prixBoutique(it.a),acc=it.a.trim()&&isAccN(it.a);
+  if(!pb){it.pn=null;it.av=0;it.promo=false;if(it.auto&&!it.man){it.x='';it.auto=false}if(it.a.trim()&&!acc)shoes++;continue}
+  let av=0;if(!acc&&!pb.promo){const val=mode==='royal'?(pb.vip||pb.bon):pb.bon;if(val&&(mode!=='non'||shoes>=1))av=val}
+  if(!acc)shoes++;
+  it.pn=pb.pv;it.av=av;it.promo=pb.promo;if(!it.man){it.x=String(pb.pv-av);it.auto=true}}}
+function infoItems(){const lib={royal:'Client Royal',fidele:'client fidèle'}[draft.fid]||'2e paire';
+ draft.items.forEach((it,i)=>{const z=document.querySelector(`[data-ii="${i}"]`);if(!z)return;
+  if(it.pn){const att=it.pn-(it.av||0);z.innerHTML=`${it.promo?'Prix promo':'Prix boutique'} ${F(it.pn)}${it.av?` · avantage ${lib} −${F(it.av)}`:''}${it.man&&+it.x!==att?` · <b style="color:var(--warn)">prix changé à la main</b>`:''}`}
+  else z.innerHTML=it.a.trim()?'<span style="color:var(--bad)">Pas dans la caisse : tapez le prix</span>':''});
+ document.querySelectorAll('[data-fd]').forEach(b=>b.classList.toggle('on',b.dataset.fd===(draft.fid||'non')));
+ const f=$('#fidInfo');if(f)f.innerHTML=draft.fidAuto?`<div class="note ok">${draft.fid==='royal'?'👑 Client Royal reconnu':'⭐ Client fidèle reconnu'} : ${draft.fidN} paire(s) de 15 000 F ou plus en 1 an${draft.fid==='fidele'?' (Royal à 4)':''}.</div>`:draft.fidMan&&draft.fid!=='non'?'<div class="note warn">Avantage choisi à la main : vérifiez le reçu-bon du client.</div>':''}
+
+/* ===================== Quartiers de Ouagadougou (estimation si pas de localisation) ===================== */
+const QUARTIERS={"Bassinko":[12.42,-1.62],"Balkuy":[12.305,-1.465],"Bendogo":[12.383,-1.45],"Bilbalogho":[12.368,-1.533],"Bissighin":[12.37,-1.615],"Boulmiougou":[12.34,-1.6],"Centre-ville":[12.3686,-1.5275],"Cissin":[12.335,-1.545],"Dagnoën":[12.382,-1.496],"Dapoya":[12.377,-1.529],"Dassasgho":[12.375,-1.47],"Gounghin":[12.362,-1.545],"Hamdalaye":[12.385,-1.545],"Kalgondin":[12.35,-1.5],"Kamboinsin":[12.46,-1.55],"Kamsonghin":[12.357,-1.525],"Karpala":[12.33,-1.465],"Kilwin":[12.4,-1.57],"Kossodo":[12.43,-1.485],"Koulouba":[12.376,-1.515],"Larlé":[12.38,-1.535],"Nagrin":[12.305,-1.55],"Nioko":[12.42,-1.445],"Nonsin":[12.41,-1.535],"Ouaga 2000":[12.315,-1.495],"Ouidi":[12.38,-1.523],"Paspanga":[12.38,-1.509],"Patte d'Oie":[12.333,-1.518],"Pissy":[12.345,-1.575],"Rimkiéta":[12.39,-1.59],"Saaba":[12.375,-1.415],"Samandin":[12.358,-1.535],"Sandogo":[12.325,-1.57],"Sig-Noghin":[12.395,-1.565],"Somgandé":[12.41,-1.5],"Taabtenga":[12.37,-1.45],"Tampouy":[12.405,-1.55],"Tanghin":[12.398,-1.515],"Wayalghin":[12.36,-1.465],"Wemtenga":[12.37,-1.488],"Yamtenga":[12.355,-1.42],"Zagtouli":[12.31,-1.63],"Zogona":[12.378,-1.496],"Zone 1":[12.388,-1.472],"Zone du Bois":[12.372,-1.5]};
+const QALIAS={ouagadeuxmille:'Ouaga 2000',ouaga2000:'Ouaga 2000',zoneun:'Zone 1',centreville:'Centre-ville',centre:'Centre-ville',marche:'Centre-ville'};
+function qTrouver(s){const c=nz(s).replace(/ /g,'');if(c.length<3)return null;if(QALIAS[c])return QALIAS[c];let b=null,bk='';
+ for(const n in QUARTIERS){const k=nz(n).replace(/ /g,'');if((c===k||c.startsWith(k)||(k.startsWith(c)&&c.length>=4))&&k.length>bk.length){b=n;bk=k}}
+ if(b)return b;let bd=9;for(const n in QUARTIERS){const k=nz(n).replace(/ /g,''),d=lev(c,k);if(k.length>=5&&d<=2&&d<bd){bd=d;b=n}}return b}
+function qCoord(s){const n=s&&qTrouver(s);return n?{n,c:QUARTIERS[n]}:null}
+// Distance avant le départ : localisation collée en priorité, sinon quartier. Les vrais km restent ceux du GPS du livreur.
+function distEstim(){const sh=S.settings.shop;if(!sh||draft.type!=='client')return null;const p=parsePos(draft.pos);
+ if(p)return{k:route(sh,p),src:'loc'};const q=qCoord(draft.qr);return q?{k:route(sh,q.c),src:'qr',nom:q.n}:null}
+function fraisBon(){if(draft.type==='gare')return null;if(draft.fm!=='auto')return +draft.fm;const d=distEstim();return d?frais(d.k):null}
+function msgClient(){const its=draft.items.filter(i=>i.a.trim()&&+i.x),fr=fraisBon(),d=distEstim(),art=its.reduce((a,i)=>a+(+i.x),0),t=S.settings.tarif;
+ const lv=draft.livreur?liv(draft.livreur).nom:'',L=['RC ELEGANCE – Votre livraison 🛵',''];
+ its.forEach(i=>L.push(`• ${i.a.trim()}${i.p?' (pointure '+i.p+')':''} : ${F(+i.x)}${i.av&&!i.man?' (fidélité −'+F(i.av)+')':''}`));
+ L.push('',fr==null?'Livraison : selon la distance':fr===0?'Livraison : offerte 🎁':'Livraison : '+F(fr));
+ L.push(fr==null?`Total à payer à la livraison : ${F(art)} + livraison`:`Total à payer à la livraison : ${F(art+fr)}`);
+ if(d)L.push('',`Vous êtes à ${d.src==='qr'?'environ ':''}${km1(d.k)} km de la boutique (par la route).`);
+ L.push(`Livraison : jusqu'à ${t.seuil} km ${F(t.base)}, de ${t.seuil} à ${t.seuil+t.pas} km ${F(t.base+t.plus)}, de ${t.seuil+t.pas} à ${t.seuil+2*t.pas} km ${F(t.base+2*t.plus)}, puis +${F(t.plus)} par tranche de ${t.pas} km.`);
+ L.push('',`Votre livreur${lv?' '+lv:''} viendra vous livrer avec plaisir.`,'📞 70 80 17 30');return L.join('\n')}
+
+/* ===================== Saisie vocale du bon ===================== */
+const NB={un:1,deux:2,trois:3,quatre:4,cinq:5,six:6,sept:7,huit:8,neuf:9};
+function chiffres(s){return s.replace(/\b(trente|quarante) et un\b/g,(m,d)=>d==='trente'?'31':'41')
+ .replace(/\b(trente|quarante) (deux|trois|quatre|cinq|six|sept|huit|neuf)\b/g,(m,d,u)=>String((d==='trente'?30:40)+NB[u]))
+ .replace(/\btrente\b/g,'30').replace(/\bquarante\b/g,'40')}
+function lev(a,b){const d=Array.from({length:a.length+1},(_,i)=>[i]);for(let j=1;j<=b.length;j++)d[0][j]=j;
+ for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[a.length][b.length]}
+function trouverModele(ch){const noms=catNoms().map(n=>[n,nz(n)]);let best=null;
+ for(const [n,k] of noms)if((' '+ch+' ').includes(' '+k+' ')&&(!best||k.length>best[1].length))best=[n,k];
+ if(best)return best[0];
+ const w=ch.replace(/\d+/g,' ').replace(/\b(pointure|paire|paires|une|un|la|le|les|de|des|du|modele|chaussure|chaussures|taille)\b/g,' ').replace(/\s+/g,' ').trim();if(w.length<3)return null;
+ let b=null,bd=9;for(const [n,k] of noms){const d=k.startsWith(w)&&w.length>=4?0:lev(w,k),lim=k.length<=4?1:2;if(d<=lim&&d<bd){bd=d;b=n}}return b}
+const KW={client:'cl',cliente:'cl',nom:'cl',monsieur:'cl',madame:'cl',telephone:'tel',tel:'tel',numero:'tel',quartier:'qr',secteur:'qr',livreur:'lv',livreuse:'lv',livre:'lv',par:'lv',moto:'vh',vehicule:'vh'};
+function lireVoix(t0){let t=' '+chiffres(nz(t0)).replace(/([a-z])(\d)/g,'$1 $2').replace(/(\d)([a-z])/g,'$1 $2')+' ';const o={items:[]};
+ for(const r of t.match(/\d[\d ]*\d/g)||[]){let d=r.replace(/\D/g,'');if(d.length>=11&&d.startsWith('226'))d=d.slice(3);
+  if(d.length>=8){o.tel=d.slice(-8).replace(/(\d\d)(?=\d)/g,'$1 ');const reste=d.slice(0,-8);t=t.replace(r,' '+reste+' ');break}}
+ if(/\bcyrus\b/.test(t))o.veh='cyrus';else if(/\belectrique\b/.test(t))o.veh='elec';else if(/\bperso\b/.test(t))o.veh='perso';
+ if(/\b(offert|offerte|gratuit|gratuite)\b/.test(t))o.fm='0';
+ const seg=[['it',[]]];for(const w of t.trim().split(' ')){const k=KW[w];if(k){if(seg[seg.length-1][0]!==k)seg.push([k,[]])}else seg[seg.length-1][1].push(w)}
+ const z={};for(const [k,ws] of seg)z[k]=((z[k]||'')+' '+ws.join(' ')).trim();
+ const zi=(z.it||'').replace(/\b(cyrus|electrique|perso|offert|offerte|gratuit|gratuite|livraison|bon|nouveau|commande|il|y|a)\b/g,' ');
+ for(let c of zi.split(/\b(?:et|plus|puis|avec|aussi)\b|\s\+\s/)){c=c.replace(/\s+/g,' ').trim();if(!c)continue;
+  const pt=(c.match(/\b([34]\d)\b/)||[])[1]||'',m=trouverModele(c),last=o.items[o.items.length-1];
+  if(m)o.items.push({a:m,p:pt});
+  else{const w=c.replace(/\d+/g,' ').replace(/\b(pointure|paire|paires|une|un|en)\b/g,' ').replace(/\s+/g,' ').trim();
+   if(w)o.items.push({a:cap(w),p:pt,inc:1});else if(pt&&last)o.items.push({a:last.a,p:pt,inc:last.inc})}}
+ if(z.cl){const n=z.cl.replace(/\d+/g,' ').replace(/\b(s|appelle|c|est|au|le|la|du|de|son|sa)\b/g,' ').replace(/\s+/g,' ').trim();if(n)o.cl=cap(n)}
+ if(z.qr){const q=qTrouver(z.qr);o.qr=q||cap(z.qr)}
+ if(z.lv){const ws=z.lv.split(' ').filter(w=>w&&!/^(la|le|l|c|est|sera|va|qui)$/.test(w));
+  const l=S.settings.livreurs.find(l=>{const ns=nz(l.nom).split(' ');return ws.some(w=>ns.includes(w)||(w.length>=4&&ns.some(x=>x.length>=4&&lev(w,x)<=1)))});
+  if(l)o.lv=l.id;else if(ws.length)o.livInc=cap(ws.slice(0,2).join(' '))}
+ return o}
+let voixTxt='',syncBon=()=>{};
+function remplirVoix(t){if(!t||!t.trim())return;syncBon();const o=lireVoix(t);
+ if(o.items.length)draft.items=o.items.map(i=>({a:i.a,p:i.p||'',x:''}));
+ if(o.tel)draft.tel=o.tel;if(o.cl)draft.cl=o.cl;if(o.qr)draft.qr=o.qr;if(o.veh)draft.veh=o.veh;if(o.fm)draft.fm=o.fm;
+ if(o.lv){draft.livreur=o.lv;draft.livInc=null}else if(o.livInc){draft.livreur=null;draft.livInc=o.livInc}
+ draft.voix=true;voixTxt=t;vBon();const m=$('#vx_m');if(m)m.innerHTML='<div class="note ok">Bon rempli. Vérifiez tout, complétez ce qui est en rouge, puis créez le bon.</div>'}
+function micro(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition,z=$('#vx_m');
+ if(!SR){z.innerHTML='<div class="note warn">Le micro de l\'appli ne marche pas sur ce téléphone : touchez la case ci-dessus, utilisez le micro 🎤 du clavier, puis « Remplir le bon ».</div>';$('#vx_t').focus();return}
+ const r=new SR();r.lang='fr-FR';r.interimResults=true;r.maxAlternatives=1;let fin='';
+ z.innerHTML='<div class="note">🎤 Je vous écoute… Parlez, puis attendez 2 secondes.</div>';
+ r.onresult=e=>{let t='';for(const x of e.results)t+=x[0].transcript;fin=t;const a=$('#vx_t');if(a)a.value=t};
+ r.onerror=e=>{z.innerHTML=`<div class="note bad">${e.error==='not-allowed'?'Micro refusé : autorisez le micro pour ce site.':e.error==='network'?'Pas d\'Internet : utilisez le micro du clavier, puis « Remplir le bon ».':'Rien entendu. Réessayez.'}</div>`};
+ r.onend=()=>{if(fin)remplirVoix(fin)};
+ try{r.start()}catch(e){}}
+function manques(){const m={};if(!draft.voix)return m;const cli=draft.type==='client';
+ if(!(draft.cl||'').trim())m.cl=1;if(cli&&!(draft.tel||'').trim())m.tel=1;if(!draft.livreur)m.liv=1;
+ draft.items.forEach((it,i)=>{if(!it.a.trim())m['a'+i]=1;if(!+it.x)m['x'+i]=1});
+ if(cli&&!parsePos(draft.pos)&&!qCoord(draft.qr))m.pos=1;return m}
+function rougir(){const M=manques(),t=(sel,k)=>{const e=$(sel);if(e)e.classList.toggle('miss',!!M[k])};
+ t('#f_cl','cl');t('#f_tel','tel');t('#f_pos','pos');t('#f_qr','pos');t('#lvz','liv');
+ draft.items.forEach((x,i)=>{t(`[data-ia="${i}"]`,'a'+i);t(`[data-ix="${i}"]`,'x'+i)});
+ const z=$('#manq');if(!z)return;const L=[M.cl&&'nom du client',M.tel&&'téléphone',M.liv&&'livreur',M.pos&&'localisation ou quartier',...draft.items.map((it,i)=>M['a'+i]?'modèle':M['x'+i]?'prix de '+(it.a||'?'):null)].filter(Boolean);
+ z.innerHTML=L.length?`<div class="note bad">À compléter : ${esc(L.join(', '))}.</div>`:(draft.voix?'<div class="note ok">Tout est rempli. Vérifiez, puis créez le bon.</div>':'')}
+function recapClient(){const z=$('#recap');if(!z)return;const fr=fraisBon(),art=totalItems(draft.items),tel=telNorm(draft.tel);
+ z.innerHTML=`<h3 style="margin-top:0">À payer par le client</h3><div class="liv"><span>Chaussures</span><b>${F(art)}</b></div><div class="liv"><span>Livraison</span><b>${fr==null?'selon la distance':fr===0?'offerte':F(fr)}</b></div>
+ <div class="liv" style="font-size:18px;margin-top:4px"><span>Total à la livraison</span><b>${F(art+(fr||0))}${fr==null?' + livraison':''}</b></div>
+ ${tel.length>=11&&art>0?`<a class="btn ok" href="${wa(tel,msgClient())}" target="_blank" rel="noopener">📲 Envoyer au client</a>`:'<p class="mut">Pour « Envoyer au client » : le téléphone du client et au moins un modèle avec son prix.</p>'}`}
+
+/* ===================== Vue : nouveau bon (boutique) ===================== */
+let draft={type:'client',livreur:null,veh:'cyrus',raison:'',items:[{a:'',p:'',x:''}],fm:'auto'};
+const totalItems=it=>it.reduce((a,i)=>a+(+i.x||0),0);
+function vBon(){
+ const st=S.settings,g=st.gare;if(!draft.items||!draft.items.length)draft.items=[{a:'',p:'',x:''}];prixDraft();
+ const shopWarn=st.shopOk?'':`<div class="note warn"><b>Position de la boutique approximative</b> (près de la Pédiatrie Charles de Gaulle). À faire une seule fois, debout dans la boutique :<button class="btn" id="fixShop">Je suis dans la boutique : enregistrer la position</button><div id="fsm"></div></div>`;
+ const gare=draft.type==='gare';
+ $('#app').innerHTML=`${shopWarn}
+ <div class="card" style="border:2px solid var(--navy)">
+  <button class="btn" id="mic" style="margin-top:0">🎤 Dicter le bon</button>
+  <p class="mut">Ex. : « Celio 42 et Retos 43, client 70 12 34 56, quartier Patte d'Oie, livreuse Ouoba »</p>
+  <textarea id="vx_t" style="min-height:56px" placeholder="Ce que l'appli a entendu (ou tapez, ou micro du clavier)">${esc(voixTxt)}</textarea>
+  <button class="btn sm ghost" id="vx_ok">Remplir le bon avec ce texte</button><div id="vx_m"></div></div>
+ <div class="chips" style="margin-top:6px">
+  <button class="chip ${!gare?'on':''}" data-ty="client">Livraison client</button>
+  <button class="chip ${gare?'on':''}" data-ty="gare">Envoi province (gare)</button></div>
+ <div class="card">
+  <label>${gare?'Destinataire (nom, ville)':'Nom du client'}</label><input id="f_cl" value="${esc(draft.cl||'')}">
+  <label>Téléphone du client</label><input id="f_tel" inputmode="tel" value="${esc(draft.tel||'')}">
+  <h3>Modèles qui sortent</h3>
+  ${draft.items.map((it,i)=>`<div class="row" style="margin-bottom:2px"><input data-ia="${i}" list="catl" placeholder="Modèle" value="${esc(it.a)}"><input data-ip="${i}" style="flex:.45" inputmode="numeric" placeholder="Pt." value="${esc(it.p)}"><input data-ix="${i}" style="flex:.7" inputmode="numeric" placeholder="Prix F" value="${esc(it.x)}">${draft.items.length>1?`<button class="btn sm ghost" style="flex:none;margin:0" data-del="${i}" aria-label="Retirer">✕</button>`:''}</div><div class="mut" data-ii="${i}" style="margin:0 0 8px"></div>`).join('')}
+  <datalist id="catl">${catNoms().map(n=>{const pb=prixBoutique(n);return `<option value="${esc(n)}">${pb?F(pb.pv):''}</option>`}).join('')}</datalist>
+  <button class="btn sm ghost" id="addI">+ Ajouter un modèle</button>
+  <h3>Avantage client</h3><div class="chips">${[['non','Nouveau client'],['fidele',"⭐ Client fidèle / bon d'un ami"],['royal','👑 Client Royal']].map(([k,l])=>`<button class="chip ${(draft.fid||'non')===k?'on':''}" data-fd="${k}">${l}</button>`).join('')}</div><div id="fidInfo"></div>
+  <p class="mut">Mêmes prix et avantages qu'à la caisse : nouveau client, avantage dès la 2e paire ; client fidèle ou bon d'un ami, sur chaque paire. Rien sur les promos et accessoires. Le niveau se reconnaît tout seul avec le téléphone du client.</p>
+  <div class="liv" style="margin-top:10px"><span>Total chaussures</span><b id="totI">${F(totalItems(draft.items))}</b></div>
+  ${gare?`<div class="note">Envoi province : tout est payé avant le départ (chaussures + ${F(g.client)} d'envoi). Coût réel : gare ${F(g.ticket)} + société ${F(g.societe)}, la boutique complète ${F(g.ticket+g.societe-g.client)}.</div>`:
+  `<h3>Frais de livraison</h3><div class="chips">${[['auto','Selon la distance'],['1000','1 000 F'],['1500','1 500 F'],['2000','2 000 F'],['0','Offert (bon client)']].map(([k,l])=>`<button class="chip ${String(draft.fm)===k?'on':''}" data-fm="${k}">${l}</button>`).join('')}</div>
+  <p class="mut">« Selon la distance » : frais calculés avec la localisation (ou le quartier) et annoncés au client. Sans les deux, l'appli du livreur les calcule à l'arrivée.</p>`}
+ </div>
+ ${gare?'':`<div class="card loc"><h3>📍 Coller la localisation du client</h3>
+  <div class="row"><input id="f_pos" placeholder="Lien de position WhatsApp du client" value="${esc(draft.pos||'')}"><button class="btn sm" style="flex:none;margin:0" id="colle">Coller</button></div>
+  <label>Pas de localisation ? Quartier du client</label><input id="f_qr" list="qrl" placeholder="ex. Patte d'Oie" value="${esc(draft.qr||'')}">
+  <datalist id="qrl">${Object.keys(QUARTIERS).map(q=>`<option value="${esc(q)}">`).join('')}</datalist>
+  <div id="estim"></div></div>`}
+ <h3>Qui livre ?</h3><div class="chips" id="lvz">${st.livreurs.map(l=>`<button class="chip ${draft.livreur===l.id?'on':''}" data-lv="${l.id}">${esc(l.nom)}</button>`).join('')}</div>
+ ${draft.livInc?`<div class="note bad">« ${esc(draft.livInc)} » n'est pas dans la liste des livreurs.<br><button class="btn sm" id="addLv">Ajouter ${esc(draft.livInc)} aux livreurs</button></div>`:''}
+ <h3>Avec quel véhicule ?</h3><div class="chips">${vehs().map(v=>`<button class="chip ${draft.veh===v.id?'on':''}" data-vh="${v.id}">${esc(v.nom)}${v.id==='elec'?' · '+Math.floor(kmRest())+' km':''}</button>`).join('')}</div>
+ ${draft.veh==='perso'?`<label>Raison de la moto perso (obligatoire)</label><select id="f_rs"><option value="">— choisir —</option>${['Cyrus déjà en course','Batterie électrique déchargée','Panne','Autorisé par le Directeur'].map(r=>`<option ${draft.raison===r?'selected':''}>${r}</option>`).join('')}</select>`:''}
+ <div id="batchk"></div>
+ ${gare?'':'<div class="card recap" id="recap"></div>'}
+ <div id="manq"></div>
+ <button class="btn gold" id="go">Créer le bon et l'envoyer</button>
+ ${gare?'':`<h3>Grille des frais (distance par la route)</h3><div class="card tbl"><table>${grille().map(([a,b])=>`<tr><td>${a}</td><td class="n"><b>${F(b)}</b></td></tr>`).join('')}</table></div>`}`;
+ const sync=()=>{draft.cl=$('#f_cl').value;draft.tel=$('#f_tel').value;
+  document.querySelectorAll('[data-ia]').forEach(i=>{const it=draft.items[i.dataset.ia];if(it.a!==i.value){it.a=i.value;it.man=false}});
+  document.querySelectorAll('[data-ip]').forEach(i=>draft.items[i.dataset.ip].p=i.value);
+  document.querySelectorAll('[data-ix]').forEach(i=>{const it=draft.items[i.dataset.ix];if(String(it.x)!==i.value){it.x=i.value;it.man=i.value!==''}});
+  prixDraft();document.querySelectorAll('[data-ix]').forEach(i=>{const it=draft.items[i.dataset.ix];if(i.value!==String(it.x)&&document.activeElement!==i)i.value=it.x});infoItems();
+  if($('#totI'))$('#totI').textContent=F(totalItems(draft.items));
+  if($('#f_pos'))draft.pos=$('#f_pos').value;if($('#f_qr'))draft.qr=$('#f_qr').value;if($('#f_rs'))draft.raison=$('#f_rs').value;estim()};
+ syncBon=sync;
+ document.querySelectorAll('#app input,#app select').forEach(i=>i.oninput=sync);
+ $('#vx_t').oninput=e=>{voixTxt=e.target.value};
+ $('#mic').onclick=micro;$('#vx_ok').onclick=()=>remplirVoix($('#vx_t').value);
+ document.querySelectorAll('[data-fd]').forEach(b=>b.onclick=()=>{sync();draft.fid=b.dataset.fd;draft.fidMan=true;draft.fidAuto=false;vBon()});
+ if($('#colle'))$('#colle').onclick=async()=>{try{const t=await navigator.clipboard.readText();if(!t)throw 0;$('#f_pos').value=t.trim();sync()}catch(e){alert('Collage automatique refusé : appui long dans la case, puis « Coller ».');$('#f_pos').focus()}};
+ if($('#addLv'))$('#addLv').onclick=()=>{sync();const n=draft.livInc;if(!n)return;if(!confirm(`Ajouter « ${n} » à la liste des livreurs ?`))return;const l={id:uid(),nom:n,tel:''};st.livreurs.push(l);save();draft.livreur=l.id;draft.livInc=null;vBon()};
+ $('#addI').onclick=()=>{sync();draft.items.push({a:'',p:'',x:''});vBon()};
+ document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{sync();draft.items.splice(+b.dataset.del,1);vBon()});
+ document.querySelectorAll('[data-fm]').forEach(b=>b.onclick=()=>{sync();draft.fm=b.dataset.fm;vBon()});
+ document.querySelectorAll('[data-ty]').forEach(b=>b.onclick=()=>{sync();draft.type=b.dataset.ty;vBon()});
+ document.querySelectorAll('[data-lv]').forEach(b=>b.onclick=()=>{sync();draft.livreur=b.dataset.lv;draft.livInc=null;vBon()});
+ document.querySelectorAll('[data-vh]').forEach(b=>b.onclick=()=>{sync();draft.veh=b.dataset.vh;vBon()});
+ $('#go').onclick=()=>{sync();creerBon()}; infoItems(); estim();
+ if($('#fixShop'))$('#fixShop').onclick=async()=>{$('#fsm').innerHTML='Prise du GPS…';try{const p=await gps();
+  if(p[2]>60){$('#fsm').innerHTML=`GPS imprécis (± ${Math.round(p[2])} m). Sortez devant la boutique, attendez 1 minute et réessayez.`;return}
+  st.shop=[p[0],p[1]];st.shopOk=true;save();vBon()}catch(e){$('#fsm').innerHTML='GPS refusé : activez la localisation et autorisez-la.'}};
+}
+function estim(){const p=parsePos(draft.pos),d=distEstim();let html='',chk=null;
+ if(d){html=`<div class="note ${d.src==='loc'?'ok':''}">${d.src==='loc'?'Distance':'Estimation par le quartier '+esc(d.nom)+' :'} <b>${km1(d.k)} km</b> aller par la route (${km1(2*d.k)} km AR) · frais : <b>${F(frais(d.k))}</b>${d.src==='qr'?'<br><span class="mut">Approximatif : la localisation du client est plus précise.</span>':''}</div>`;chk=checkCourse(draft.veh,2*d.k)}
+ if(draft.pos&&!p)html=`<div class="note warn">${/goo\.gl|maps\.app/i.test(draft.pos)?'Lien court Google Maps : l\'appli ne peut pas le lire. Demandez au client d\'envoyer sa position par WhatsApp (📎 puis Position), ou collez les chiffres (ex. 12.3712, -1.5197).':'Lien non reconnu : il faut un lien qui contient les coordonnées (ex. 12.3712,-1.5197).'}</div>`+html;
+ if(!p&&draft.qr&&!qCoord(draft.qr))html+=`<div class="note warn">Quartier « ${esc(draft.qr)} » inconnu : choisissez dans la liste ou collez la localisation.</div>`;
+ if($('#estim'))$('#estim').innerHTML=html;
+ if(!chk&&draft.veh==='elec'){const c=conseil();chk={c:c.c,t:`Batterie ${batMontee().ah} Ah : ${c.t}. ${c.d}`}}
+ if($('#batchk'))$('#batchk').innerHTML=chk?`<div class="note ${chk.c}">${chk.t}</div>`:'';
+ recapClient();rougir();}
+function creerBon(){const st=S.settings;
+ const items=draft.items.filter(i=>i.a.trim()||+i.x).map(i=>({a:i.a.trim()||'Modèle',p:i.p,x:+i.x||0,...(i.pn?{pn:i.pn}:{}),...(i.av&&!i.man?{av:i.av}:{})}));
+ if(!draft.cl||!draft.livreur){alert('Il manque le client ou le livreur.');return}
+ if(!items.length){alert('Ajoutez au moins un modèle avec son prix.');return}
+ if(draft.veh==='perso'&&!draft.raison){alert('Choisissez la raison de la moto perso.');return}
+ if(draft.veh==='elec'&&kmRest()<=10&&!confirm('Il reste 10 km ou moins sur la batterie. Envoyer quand même ?'))return;
+ const gare=draft.type==='gare',dE=gare?null:distEstim();let fm=gare?'gare':draft.fm;
+ if(fm==='auto'&&dE)fm=String(frais(dE.k)); // frais annoncés au client = frais du bon
+ const msgCl=!gare&&telNorm(draft.tel).length>=11?msgClient():'';
+ const L={id:uid(),type:draft.type,at:Date.now(),cl:draft.cl,tel:draft.tel,items,art:items.map(i=>i.a+(i.p?' ('+i.p+')':'')).join(', '),m:totalItems(items),fm,
+  livreur:draft.livreur,livNom:liv(draft.livreur).nom,veh:draft.veh,raison:draft.raison,code:String(Math.floor(1000+Math.random()*9000)),
+  cpos:parsePos(draft.pos),qr:draft.qr||'',kmE:dE?+dE.k.toFixed(2):null,fa:draft.fm==='auto'&&dE?1:0,statut:'en_cours',alertes:[],remis:false,retour:false,controle:Math.random()<1/(st.ctrl||5),cc:!!st.codeClient};
+ for(const it of items){const c=S.cat.find(x=>x.n.toLowerCase()===it.a.toLowerCase());
+  const pv=it.pn||it.x;
+  if(c&&!c.pv&&pv){c.pv=pv;S.catLog.unshift({at:Date.now(),n:c.n,av:null,ap:pv,par:'appris sur un bon'})}
+  else if(!c&&pv&&it.a!=='Modèle'){S.cat.push({id:uid(),n:it.a,pv,pa:null});S.catLog.unshift({at:Date.now(),n:it.a+' (nouveau)',av:null,ap:pv,par:'appris sur un bon'})}}
+ S.livs.unshift(L);save();
+ const payload={cc:L.cc?1:0,i:L.id,y:L.type,c:L.cl,t:L.tel,it:items.map(i=>[i.a,i.p,i.x]),fm,tf:st.tarif,g:st.gare,l:liv(L.livreur).nom,v:vehNom(L.veh),s:st.shop,d:L.at,cp:L.cpos,w:st.waBoutique,...(L.qr?{q:L.qr}:{})};
+ const code='RCB:'+enc(payload);
+ const lien=st.baseUrl?st.baseUrl.replace(/#.*$/,'')+'#'+code:'';
+ const fr=gare?'Envoi déjà payé':fm==='auto'?'Livraison : selon la distance (l\'appli calcule)':+fm===0?'Livraison OFFERTE':'Livraison : '+F(+fm);
+ const txt=`🛵 BON RC Elegance\n${gare?'Envoi province : ':'Client : '}${L.cl}${L.tel?' ('+L.tel+')':''}\n${items.map(i=>`• ${i.a}${i.p?' pt '+i.p:''} : ${F(i.x)}`).join('\n')}\n${fr}\n${L.qr?'Quartier : '+L.qr+'\n':''}Véhicule : ${vehNom(L.veh)}\n\n${lien?'Ouvrir le bon : '+lien+'\n\n':''}Code du bon (à coller dans RC Livraison) :\n${code}`;
+ draft={type:'client',livreur:draft.livreur,veh:draft.veh,raison:'',items:[{a:'',p:'',x:''}],fm:'auto'};voixTxt='';
+ $('#app').innerHTML=`<div class="note ok">Bon créé pour <b>${esc(L.cl)}</b> : ${items.length} modèle(s), ${F(L.m)}. Envoyez dans l'ordre :</div>
+ <a class="btn" href="${wa(liv(L.livreur).tel,txt)}" target="_blank" rel="noopener">1. Envoyer le bon à ${esc(liv(L.livreur).nom)}</a>${btnSms(liv(L.livreur).tel,txt)}
+ ${!gare&&L.cc&&L.tel?`<a class="btn gold" href="${wa(telNorm(L.tel),`Bonjour, votre commande RC Elegance est en route 🛵\nVotre code de livraison : ${L.code}\nDonnez ce code au livreur seulement quand vous avez vos chaussures en main. Merci !`)}" target="_blank" rel="noopener">2. Envoyer le code ${L.code} au client</a>${btnSms(telNorm(L.tel),'RC Elegance : votre code de livraison est '+L.code+'. Donnez-le au livreur seulement quand vous avez vos chaussures en main.')}`:(gare||!L.cc)?'':`<div class="note">Code client : <b>${L.code}</b> (à donner au client par téléphone).</div>`}
+ ${msgCl?`<a class="btn ghost" href="${wa(telNorm(L.tel),msgCl)}" target="_blank" rel="noopener">📲 Envoyer le récapitulatif au client</a>`:''}
+ ${rappelVeh(L.veh,true)}<button class="btn ghost" id="nv">Nouveau bon</button>`;
+ $('#nv').onclick=vBon;}
+function rappelVeh(v,shop){
+ if(v==='cyrus'){const r=cyrLitres();return `<div class="note ${r<1?'bad':''}"><b>Cyrus :</b> essence estimée ${r.toFixed(1)} L. ${shop?'Aucun argent d\'essence ne sort de la caisse : le plein se fait seulement à la station, avec reçu, et se note dans Véhicules.':'Panne d\'essence : appeler la boutique, ne pas acheter au bord de la route.'}</div>`}
+ if(v==='elec'){const c=conseil();return `<div class="note ${c.c}"><b>Moto électrique (${batMontee().ah} Ah) :</b> ${c.d} L'écran de la moto ne marche pas : c'est l'application qui fait la jauge. 50 km/h maximum.</div>`}
+ return ''}
+
+/* ===================== Vue : en cours / retours (boutique) ===================== */
+function vCours(){
+ const enc_=S.livs.filter(l=>l.statut==='en_cours');
+ const aRegler=S.livs.filter(l=>l.statut!=='en_cours'&&l.statut!=='annule'&&((!l.remis&&l.encaisse>0)||(l.statut==='pas_achete'||l.statut==='partiel')&&!l.retour||(l.type==='gare'&&!l.photo)));
+ $('#app').innerHTML=`<h2>Recevoir le retour d'une livreuse</h2>
+ <div class="card"><label>Coller ici le message reçu sur WhatsApp</label><textarea id="rr" placeholder="RCR:...">${esc(pasteMsg)}</textarea>
+ <button class="btn" id="valR">Valider la livraison</button><div id="rmsg"></div></div>
+ <button class="btn gold" id="rapDir">Envoyer le point du jour au Directeur</button>
+ <div id="rapZone"></div><p class="mut">À faire chaque soir à la fermeture, et tout de suite en cas d'alerte.</p>
+ <h2>En route (${enc_.length})</h2>${enc_.length?enc_.map(cardLiv).join(''):'<p class="mut">Aucune course en route.</p>'}
+ <h2>À régler (${aRegler.length})</h2>${aRegler.length?aRegler.map(cardRegler).join(''):'<p class="mut">Argent et chaussures : tout est rentré.</p>'}`;
+ $('#rapDir').onclick=envoyerPoint;
+ $('#valR').onclick=()=>{const t=$('#rr').value;if(/RCP:/.test(t)){$('#rmsg').innerHTML=lireReglages(t);return}const r=lireRetour(t);$('#rmsg').innerHTML=r;if(r.includes('ok')&&!r.includes('data-alr'))setTimeout(()=>{pasteMsg='';vCours()},1600);if($('[data-alr]'))$('[data-alr]').onclick=envoyerPoint};
+ document.querySelectorAll('[data-an]').forEach(b=>b.onclick=()=>{const L=S.livs.find(x=>x.id===b.dataset.an);if(confirm('Annuler ce bon ?')){L.statut='annule';save();vCours()}});
+ document.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{S.livs.find(x=>x.id===b.dataset.rm).remis=true;save();vCours()});
+ document.querySelectorAll('[data-np]').forEach(b=>b.onclick=()=>{const l=S.livs.find(x=>x.id===b.dataset.np);l.photo=true;S.recus=S.recus||[];S.recus.unshift({k:null,at:Date.now(),type:'Gare',label:(l.cl||'')+' · reçu '+(l.recu||'?')+' (sans photo)',montant:l.ticket});save();vCours()});
+ aRegler.filter(l=>l.type==='gare'&&!l.photo).forEach(l=>{const i=$('#pg_'+l.id);if(i)i.onchange=async()=>{if(!i.files[0])return;
+  try{await archiver(i.files[0],{type:'Gare',label:l.cl+(l.recu?' · reçu '+l.recu:''),montant:l.ticket});l.photo=true;save();vCours()}catch(e){alert('Photo non enregistrée : '+e.message)}}});
+ document.querySelectorAll('[data-rt]').forEach(b=>b.onclick=()=>{S.livs.find(x=>x.id===b.dataset.rt).retour=true;save();vCours()});
+}
+function cardLiv(l){return `<div class="card liv"><div><b>${esc(l.cl)}</b><span class="mut">${esc(liv(l.livreur).nom)} · ${esc(vehNom(l.veh))} · ${fmtD(l.at)}</span><br><span class="mut">${esc(l.art)} · ${F(l.m)} · code ${l.code}</span></div><button class="btn sm ghost" data-an="${l.id}">Annuler</button></div>`}
+function cardRegler(l){const st={achete:'Tout acheté',partiel:'En partie',pas_achete:'Pas acheté',depose:'Déposé gare'}[l.statut]||l.statut;
+ return `<div class="card"><div class="liv"><div><b>${esc(l.cl)}</b><span class="mut">${esc(liv(l.livreur).nom)} · ${st} · ${fmtD(l.arr)}</span></div><span class="tag ${l.alertes.length?'bad':'ok'}">${l.alertes.length?l.alertes.length+' alerte(s)':'OK'}</span></div>
+ ${l.alertes.map(a=>`<div class="note bad">${esc(a)}</div>`).join('')}
+ ${!l.remis&&l.encaisse>0?`<button class="btn sm" data-rm="${l.id}">Argent remis : ${F(l.encaisse)}</button>`:''}
+ ${l.type==='gare'&&!l.photo?`<div class="note warn">${l.sansPhoto?'Envoyé sans photo (urgence), reçu n° '+esc(l.recu||'?')+'. Archivez la photo quand le livreur la donne :':'Archivez la photo du reçu reçue sur WhatsApp :'}</div><button class="btn sm ghost" data-np="${l.id}">Pas de photo : garder seulement le numéro</button>${champPhoto('pg_'+l.id,'📷 Archiver la photo du reçu')}`:''}
+ ${(l.statut==='pas_achete'||l.statut==='partiel')&&!l.retour?`<button class="btn sm ghost" data-rt="${l.id}">Revenu en boutique : ${esc((l.rendre||[l.art]).join(', '))}</button>`:''}</div>`}
+function lireRetour(txt){const m=(txt||'').match(/RCR:([A-Za-z0-9_-]+)/);if(!m)return '<div class="note bad">Aucun code RCR trouvé dans ce message.</div>';
+ let r;try{r=dec(m[1])}catch(e){return '<div class="note bad">Code abîmé : demandez à la livreuse de renvoyer le message complet.</div>'}
+ const L=S.livs.find(x=>x.id===r.i);if(!L)return '<div class="note bad">Ce bon n\'existe pas sur ce téléphone.</div>';
+ if(L.statut!=='en_cours')return '<div class="note warn">Ce retour a déjà été enregistré.</div>';
+ const sh=S.settings.shop,al=[];let kmA=0;
+ if(r.la&&sh){kmA=route(sh,[r.la,r.ln])}
+ L.sansPhoto=L.type==='gare'&&!r.ph;L.arr=r.at;L.apos=r.la?[r.la,r.ln]:null;L.precision=r.ac;L.raisonEchec=r.x||'';L.ticket=+r.tk||0;L.recu=r.rc||'';
+ L.statut={T:'achete',P:'partiel',N:'pas_achete',G:'depose'}[r.r];
+ const its=L.items||[{a:L.art,p:L.pt,x:L.m}];L.kp=r.kp||(r.r==='T'||r.r==='G'?its.map((x,i)=>i):[]);
+ L.vendu=L.kp.reduce((a,i)=>a+(its[i]?its[i].x:0),0);
+ L.encaisse=L.type==='gare'?0:(r.e!=null?+r.e:L.vendu);
+ if(L.cc&&L.type==='client'&&r.r!=='N'&&r.k&&String(r.k)!==L.code)al.push(`Code client faux (saisi : ${r.k}, attendu : ${L.code}).`);
+ if(L.cc&&L.type==='client'&&r.r!=='N'&&!r.k)al.push('Sans code client : le client n\'a pas donné son code.');
+ if(L.cpos&&L.apos){const d=hav(L.cpos,L.apos)*1000;if(d>300)al.push(`Position douteuse : arrivée à ${Math.round(d)} m de la position envoyée par le client.`);
+  kmA=Math.min(kmA,route(sh,L.cpos))||kmA}
+ if(!L.apos)al.push('Pas de position GPS à l\'arrivée.');
+ const min=(r.at-L.at)/60000;if(kmA&&min>kmA*4+45)al.push(`Course longue : ${Math.round(min)} min pour ${kmA.toFixed(1)} km.`);
+ if(L.apos&&r.ac>150)al.push(`GPS imprécis (± ${Math.round(r.ac)} m).`);
+ L.kmA=+kmA.toFixed(2);L.kmAR=+(2*kmA).toFixed(2);
+ L.frais=L.type==='gare'?S.settings.gare.client:(r.f!=null?+r.f:frais(kmA));L.offert=L.type!=='gare'&&L.fm==='0'&&r.r!=='N';
+ if(L.type==='client'&&L.fm==='auto'&&r.f!=null&&kmA&&Math.abs(r.f-frais(kmA))>=500)al.push(`Frais déclarés ${F(r.f)} au lieu de ${F(frais(kmA))} pour ${kmA.toFixed(1)} km.`);
+ const info=L.fa&&kmA&&L.type==='client'&&frais(kmA)!==+L.fm?`<div class="note">Info : frais annoncés au client ${F(+L.fm)} (estimation ${km1(L.kmE||0)} km). GPS du livreur : ${km1(kmA)} km, soit ${F(frais(kmA))} selon la grille.</div>`:'';
+ if(L.veh==='perso')L.indem=Math.round(L.kmAR*S.settings.coutKm);
+ L.cout=Math.round(L.kmAR*coutKmVeh(L.veh))+(L.type==='gare'?L.ticket:0);
+ if(L.controle)al.push(`Appel de contrôle tiré au sort : appeler ${L.tel||'le client'} pour confirmer.`);
+ L.alertes=al;if(r.r==='T'||r.r==='G')L.retour=true;L.rendre=its.filter((x,i)=>!L.kp.includes(i)).map(x=>x.a+(x.p?' ('+x.p+')':''));
+ if(L.veh==='elec'){const x=S.elec;x.km+=L.kmAR;if(!x.users.includes(L.livreur))x.users.push(L.livreur)}
+ if(L.veh==='cyrus'){S.cyrus.km+=L.kmAR;if(!S.cyrus.users.includes(L.livreur))S.cyrus.users.push(L.livreur)}
+ const prev=S.livs.filter(x=>x.tel&&x.tel===L.tel&&x.statut==='pas_achete').length;
+ save();
+ const bm=L.veh==='elec'?(()=>{const c=conseil();return `<div class="note ${c.c}"><b>${c.t}</b> — ${c.d}</div>`})():'';
+ return `<div class="note ${al.length?'warn':'ok'}">ok — ${esc(L.cl)} : ${({achete:'tout acheté',partiel:'acheté en partie',pas_achete:'rien acheté',depose:'déposé à la gare'})[L.statut]} · ${L.kmAR} km AR${L.type==='gare'?'':' · livraison '+(L.offert?'offerte':F(L.frais))}${al.length?' · '+al.length+' alerte(s)':''}</div>${L.type==='gare'?'':`<div class="note">Le livreur doit remettre <b>${F(L.encaisse)}</b>${L.rendre.length?' et rapporter : '+esc(L.rendre.join(', ')):''}.</div>`}${info}${bm}${L.statut==='pas_achete'&&prev>=2?'<div class="note bad">Client à risque : 2e « pas acheté ». Exiger un paiement OM avant le prochain départ.</div>':''}${al.length?`<button class="btn bad" data-alr="1">Prévenir le Directeur maintenant</button>`:''}`}
+
+/* ===================== Directeur à distance ===================== */
+async function packer(o){const json=JSON.stringify(o);
+ try{if(window.CompressionStream){const cs=new Blob([json]).stream().pipeThrough(new CompressionStream('gzip'));const buf=new Uint8Array(await new Response(cs).arrayBuffer());
+  let bin='';for(let i=0;i<buf.length;i+=8192)bin+=String.fromCharCode.apply(null,buf.subarray(i,i+8192));
+  return '1'+btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}}catch(e){}
+ return '0'+enc(o)}
+async function depacker(t){const k=t[0],d=t.slice(1);if(k==='0')return dec(d);
+ let b=d.replace(/-/g,'+').replace(/_/g,'/');while(b.length%4)b+='=';const bin=atob(b),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
+ const ds=new Blob([u]).stream().pipeThrough(new DecompressionStream('gzip'));return JSON.parse(await new Response(ds).text())}
+function resumeJour(){const d=new Date().toDateString(),L=S.livs.filter(l=>new Date(l.at).toDateString()===d);
+ const ok=L.filter(l=>['achete','partiel','depose'].includes(l.statut)).length,ko=L.filter(l=>l.statut==='pas_achete').length,route_=L.filter(l=>l.statut==='en_cours').length;
+ const fr=L.reduce((a,l)=>a+(l.frais||0),0),du=S.livs.filter(l=>!l.remis&&l.encaisse>0).reduce((a,l)=>a+l.encaisse,0);
+ const al=L.flatMap(l=>l.alertes.map(a=>'• '+l.cl+' : '+a));
+ const px=S.catLog.filter(x=>new Date(x.at).toDateString()===d).map(x=>`• ${x.n} : ${x.av?F(x.av):'—'} → ${F(x.ap)}`);
+ const parL=S.settings.livreurs.map(v=>{const n=L.filter(l=>l.livreur===v.id&&['achete','partiel','depose'].includes(l.statut)).length;return n?`${v.nom} : ${n}`:''}).filter(Boolean).join(', ');
+ return `📊 Point livraisons RC Elegance, ${new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})}
+Réussies : ${ok} · Pas achetées : ${ko} · En route : ${route_}
+${parL?'Par livreur : '+parL+'\n':''}Frais de livraison : ${F(fr)}
+Argent pas encore remis : ${F(du)}
+Moto électrique : ${Math.floor(kmRest())} km restants (${batMontee().ah} Ah)
+Cyrus : essence ≈ ${Math.floor(cyrLitres()/S.settings.cyrRef*100)} km
+${al.length?'⚠️ Alertes :\n'+al.join('\n'):'Aucune alerte.'}${px.length?'\n💲 Prix modifiés :\n'+px.join('\n'):''}`}
+async function envoyerPoint(){const cut=Date.now()-62*86400000;
+ const snap={...S,livs:S.livs.filter(l=>l.at>=cut),envoye:Date.now()};
+ const code='RCS:'+await packer(snap);
+ const z=$('#rapZone');if(z)z.innerHTML=`<a class="btn ok" href="${wa(S.settings.waDir,resumeJour()+'\n\n(Code pour l\'appli du Directeur)\n'+code)}" target="_blank" rel="noopener">Ouvrir WhatsApp et envoyer</a>${btnSms(S.settings.waDir,resumeJour(),'Sans Internet : envoyer le résumé par SMS')}<p class="mut">Le SMS ne met pas à jour l'appli du Directeur : renvoyer par WhatsApp quand la connexion revient.</p>`}
+function lireReglages(t){const m=t.match(/RCP:([A-Za-z0-9_-]+)/);try{const o=dec(m[1]);
+ const keep={shop:S.settings.shop,shopOk:S.settings.shopOk};S.settings={...o,...(o.shopOk?{}:keep)};save();load();
+ return '<div class="note ok">Nouveaux réglages du Directeur appliqués.</div>'}catch(e){return '<div class="note bad">Code de réglages abîmé.</div>'}}
+function vRecu(){const recu=S.envoye;
+ $('#app').innerHTML=`<h2>Recevoir le point de la boutique</h2>
+ <div class="card"><label>Coller ici tout le message « Point livraisons » reçu sur WhatsApp</label><textarea id="rs_t" placeholder="RCS:..."></textarea>
+ <button class="btn" id="rs_ok">Mettre à jour</button><div id="rs_m"></div>
+ <p class="mut">${recu?'Dernier point reçu : '+fmtD(recu):'Aucun point reçu pour l\'instant.'} Ensuite, ouvrez Bilan, Véhicules ou Caisse moto : tout correspond à ce que la boutique a envoyé.</p></div>
+ <h2>Changer les réglages à distance</h2>
+ <div class="card"><p class="mut">Après avoir modifié les Réglages ici, envoyez-les à la boutique. La caissière colle le message dans « En cours » et les réglages s'appliquent.</p>
+ <a class="btn gold" id="rp_send" target="_blank" rel="noopener">Envoyer mes réglages à la boutique</a></div>`;
+ $('#rp_send').href=wa(S.settings.waBoutique,'Nouveaux réglages RC Livraison. À coller dans « En cours » :\nRCP:'+enc(S.settings));
+ $('#rs_ok').onclick=async()=>{const m=$('#rs_t').value.match(/RCS:([0-9][A-Za-z0-9_-]+)/);if(!m){$('#rs_m').innerHTML='<div class="note bad">Aucun code RCS dans ce message. Copiez le message en entier.</div>';return}
+  try{const o=await depacker(m[1]);const pin=S.settings.pin;S=o;if(!S.settings.pin)S.settings.pin=pin;save();load();$('#rs_m').innerHTML=`<div class="note ok">Point du ${fmtD(o.envoye)} chargé.</div>`;setTimeout(vRecu,1200)}
+  catch(e){$('#rs_m').innerHTML='<div class="note bad">Code abîmé : demandez à la boutique de renvoyer le point.</div>'}};}
+
+/* ===================== Vue : livreuse ===================== */
+let res=null,coche=[],recuPhoto=null;
+function vLivreuse(){
+ if(!bonRecu){$('#app').innerHTML=`<h2>Ouvrir un bon</h2><div class="card"><label>Collez ici le bon reçu sur WhatsApp</label><textarea id="pb" placeholder="RCB:..."></textarea><button class="btn" id="ob">Ouvrir le bon</button><div id="pbm"></div></div>
+ <p class="mut">Astuce : appui long dans la case, puis « Coller ».</p>`;
+  $('#ob').onclick=()=>{const m=$('#pb').value.match(/RCB:([A-Za-z0-9_-]+)/);if(!m){$('#pbm').innerHTML='<div class="note bad">Aucun bon trouvé. Copiez tout le message WhatsApp.</div>';return}
+   try{bonRecu=dec(m[1]);if(!bonRecu.it)bonRecu.it=[[bonRecu.a||'Modèle',bonRecu.p||'',bonRecu.m||0]];coche=bonRecu.it.map(()=>true);res=null;vLivreuse()}catch(e){$('#pbm').innerHTML='<div class="note bad">Bon abîmé : redemandez-le à la boutique.</div>'}};return}
+ const B=bonRecu,gare=B.y==='gare',g=B.g||{client:1500,ticket:1000,societe:1000};
+ const tot=B.it.reduce((a,x,i)=>a+(coche[i]?x[2]:0),0);
+ const frLib=gare?'':B.fm==='auto'?'calculés à l\'arrivée':+B.fm===0?'OFFERTS (bon client)':F(+B.fm);
+ $('#app').innerHTML=`<div class="card"><span class="tag">${gare?'Envoi province':'Livraison'} · ${esc(B.l)}</span>
+ <div class="big" style="margin-top:6px">${esc(B.c)}</div><div class="mut">${esc(B.t||'')}${B.q?' · '+esc(B.q):''} · ${esc(B.v)}</div>
+ ${B.t?`<a class="btn sm ghost" href="tel:${esc(B.t)}">Appeler le client</a>`:''}${B.cp?`<a class="btn sm ghost" href="https://www.google.com/maps/dir/?api=1&destination=${B.cp[0]},${B.cp[1]}" target="_blank" rel="noopener">Itinéraire</a>`:''}</div>
+ ${gare?`<h2>À la gare</h2><div class="card">${B.it.map(x=>`<div class="liv"><span>${esc(x[0])} ${x[1]?'pt '+esc(x[1]):''}</span><b>${F(x[2])}</b></div>`).join('')}<p class="mut">Déjà payé par le client. Rien à encaisser.</p>
+  <div class="row"><div><label>Ticket gare (F)</label><input id="tk" inputmode="numeric" value="${g.ticket}"></div><div><label>Société de livraison (F)</label><input id="so" inputmode="numeric" value="${g.societe}"></div></div>
+  ${champPhoto('ph_gare')}<label>Numéro du reçu (obligatoire si pas de photo)</label><input id="rc"><button class="btn ok" id="dep">Déposé à la gare ✓</button></div>`:
+ `<h2>Chez le client</h2>
+ <div class="card"><p class="mut" style="margin-top:0">Cochez ce que le client garde :</p>
+  ${B.it.map((x,i)=>`<label style="display:flex;gap:12px;align-items:center;font-size:16px;color:var(--ink);padding:10px 0;border-bottom:1px solid var(--line);margin:0"><input type="checkbox" data-ck="${i}" ${coche[i]?'checked':''} style="width:26px;height:26px;flex:none"><span style="flex:1">${esc(x[0])}${x[1]?' · pt '+esc(x[1]):''}</span><b>${F(x[2])}</b></label>`).join('')}
+  <div class="liv" style="margin-top:10px"><span>Chaussures gardées</span><b id="totc">${F(tot)}</b></div>
+  <div class="liv"><span>Frais de livraison</span><b>${frLib}</b></div></div>
+ ${B.cc?`<label>Code donné par le client (4 chiffres)</label><input id="kc" inputmode="numeric" maxlength="4" style="font-size:26px;letter-spacing:8px;text-align:center">`:''}
+ <button class="btn ok" id="vend" ${tot?'':'disabled style="opacity:.4"'}>Valider la vente</button>
+ <button class="btn bad" id="rien">Rien acheté</button>
+ <div id="pn" class="hide"><label><input type="checkbox" id="frq" style="width:auto"> Le client a quand même payé la livraison</label><label>Touchez la raison pour envoyer</label><div class="chips">${['Client absent','Pointure','Refus du modèle','A changé d\'avis','Injoignable'].map(x=>`<button class="chip" data-x="${x}">${x}</button>`).join('')}</div></div>`}
+ <div class="note">${/Cyrus/.test(B.v)?'Panne d\'essence : appeler la boutique. Ne jamais acheter d\'essence au bord de la route.':/électrique/.test(B.v)?'Moto électrique : 50 km/h maximum. Pas de détour.':'Moto perso : seule la distance boutique → client est remboursée.'}</div>
+ <div id="lm"></div><button class="btn ghost" id="autre">Ouvrir un autre bon</button>`;
+ $('#autre').onclick=()=>{bonRecu=null;vLivreuse()};
+ document.querySelectorAll('[data-ck]').forEach(c=>c.onchange=()=>{coche[+c.dataset.ck]=c.checked;
+  const t=B.it.reduce((a,x,i)=>a+(coche[i]?x[2]:0),0);$('#totc').textContent=F(t);const v=$('#vend');v.disabled=!t;v.style.opacity=t?1:.4});
+ if($('#vend'))$('#vend').onclick=()=>{if(!coche.some(Boolean))return;
+  if(B.cc&&$('#kc').value.trim().length!==4&&!confirm('Le client n\'a pas donné son code ? La vente sera quand même enregistrée. Continuer ?'))return;envoyer({r:coche.every(Boolean)?'T':'P',k:$('#kc')?$('#kc').value:'',kp:coche.map((c,i)=>c?i:-1).filter(i=>i>=0)})};
+ if($('#rien'))$('#rien').onclick=()=>$('#pn').classList.remove('hide');
+ document.querySelectorAll('[data-x]').forEach(b=>b.onclick=()=>envoyer({r:'N',x:b.dataset.x,k:$('#kc')?$('#kc').value:'',kp:[],frq:$('#frq').checked}));
+ suivrePhoto('ph_gare');
+ if($('#dep'))$('#dep').onclick=async()=>{const f=$('#ph_gare').files[0],num=$('#rc').value.trim();recuPhoto=null;
+  if(!f&&!num){alert('Prenez la photo du reçu. En urgence (pas de photo possible), tapez au moins le numéro du reçu.');return}
+  if(!f&&!confirm('Envoyer sans photo, avec seulement le numéro du reçu ?'))return;
+  if(f){try{recuPhoto=new File([await compresser(f)],'recu-gare.jpg',{type:'image/jpeg'})}catch(e){recuPhoto=f}}
+  envoyer({r:'G',tk:(+$('#tk').value||0)+(+$('#so').value||0),rc:$('#rc').value,kp:B.it.map((x,i)=>i)})};
+}
+async function envoyer(o){const B=bonRecu;$('#lm').innerHTML='<div class="note">Prise de la position GPS…</div>';
+ let p=null;try{p=await gps()}catch(e){}
+ let kmA=null;if(p&&B.s)kmA=route(B.s,[p[0],p[1]]);
+ let fr=0;
+ if(B.y!=='gare'&&(o.r!=='N'||o.frq)){fr=B.fm==='auto'?(kmA!=null?frais(kmA,B.tf||S.settings.tarif):null):+B.fm}
+ if(fr===null){$('#lm').innerHTML=`<div class="note warn">GPS indisponible : les frais n'ont pas pu être calculés. Tapez ce que le client a payé pour la livraison.</div><input id="frm" inputmode="numeric" placeholder="ex. 1000"><button class="btn" id="frok">Continuer</button>`;
+  $('#frok').onclick=()=>{fin(+$('#frm').value||0)};return}
+ fin(fr);
+ function fin(fr){
+  const art=o.kp.reduce((a,i)=>a+B.it[i][2],0),tot=B.y==='gare'?0:art+fr;
+  const ret={ph:recuPhoto?1:0,i:B.i,r:o.r,k:o.k||'',kp:o.kp,f:fr,e:tot,x:o.x||'',tk:+o.tk||0,rc:o.rc||'',at:Date.now(),la:p?+p[0].toFixed(6):null,ln:p?+p[1].toFixed(6):null,ac:p?Math.round(p[2]):null};
+  const km=kmA!=null?`\nDistance boutique : ${kmA.toFixed(1)} km`:'\n(sans GPS)';
+  const lib={T:'TOUT ACHETÉ ✓',P:'ACHETÉ EN PARTIE',N:'RIEN ACHETÉ ('+ret.x+')',G:'DÉPOSÉ À LA GARE (payé '+F(ret.tk)+')'}[o.r];
+  const det=o.kp.map(i=>`• ${B.it[i][0]} : ${F(B.it[i][2])}`).join('\n');
+  const txt=`RC Livraison · ${B.l}\n${B.c} : ${lib}\n${det}${B.y!=='gare'?`\nLivraison : ${F(fr)}\nTOTAL ENCAISSÉ : ${F(tot)}`:''}${km}\n\nRCR:${enc(ret)}`;
+  $('#lm').innerHTML=`${B.y!=='gare'?`<div class="note ok" style="font-size:18px">À encaisser : <b>${F(tot)}</b><br><span class="mut">chaussures ${F(art)} + livraison ${F(fr)}</span></div>`:''}${B.y==='gare'&&recuPhoto&&navigator.canShare&&navigator.canShare({files:[recuPhoto]})?`<button class="btn" id="shr">Envoyer à la boutique avec la photo</button><p class="mut">Choisissez WhatsApp, puis la discussion de la boutique.</p>`:`<a class="btn" href="${wa(B.w,txt)}" target="_blank" rel="noopener">Envoyer à la boutique sur WhatsApp</a>${B.y==='gare'&&recuPhoto?'<div class="note warn">Envoyez aussi la photo du reçu dans la même discussion WhatsApp.</div>':''}`}${btnSms(B.w,txt)}`;
+  if($('#shr'))$('#shr').onclick=()=>navigator.share({files:[recuPhoto],text:txt}).catch(()=>{});}
+}
+
+/* ===================== Vue : articles et prix de vente ===================== */
+let artQ='';
+function vArt(){const manque=S.cat.filter(c=>!c.pv).length,q=artQ.toLowerCase();
+ const liste=S.cat.filter(c=>!q||c.n.toLowerCase().includes(q)).sort((a,b)=>a.n.localeCompare(b.n,'fr'));
+ $('#app').innerHTML=`<h2>Articles et prix de vente</h2>
+ <div class="note">Rien à remplir à l'avance. Si un modèle n'a pas encore de prix, on le tape une fois sur le bon : l'appli le retient pour les fois suivantes. ${manque?manque+' modèle(s) attendent leur premier prix.':''}</div>
+ <input id="aq" placeholder="Chercher un modèle…" value="${esc(artQ)}">
+ <div class="card" style="padding:4px 14px">${liste.map(c=>`<div class="liv" style="align-items:center;padding:8px 0;border-bottom:1px solid var(--line)">
+  <div style="flex:1"><b>${esc(c.n)}</b>${dir?`<span class="mut">achat ${c.pa?F(c.pa):'non confirmé'}${c.pa&&c.pv?' · marge '+F(c.pv-c.pa):''}</span>`:''}</div>
+  <input data-pv="${c.id}" inputmode="numeric" placeholder="Prix" value="${c.pv||''}" style="width:110px;flex:none"></div>`).join('')||'<p class="mut">Aucun article trouvé.</p>'}</div>
+ <h3>Ajouter un article</h3><div class="card"><div class="row"><input id="an" placeholder="Nom du modèle"><input id="ap" inputmode="numeric" placeholder="Prix de vente" style="flex:.6"></div>
+ ${dir?'<input id="aa" inputmode="numeric" placeholder="Prix d\'achat (Directeur)" style="margin-top:8px">':''}
+ <button class="btn" id="aok">Ajouter</button></div>
+ ${S.catLog.length?`<h3>Derniers changements de prix</h3><div class="card">${S.catLog.slice(0,8).map(l=>`<div class="liv mut"><span>${fmtD(l.at)} · ${esc(l.n)} (${l.par})</span><b>${l.av?F(l.av):'—'} → ${F(l.ap)}</b></div>`).join('')}</div>`:''}
+ <p class="mut">Chaque changement de prix est noté et part dans le point du jour envoyé au Directeur.</p>`;
+ $('#aq').oninput=e=>{artQ=e.target.value;const pos=e.target.selectionStart;vArt();const n=$('#aq');n.focus();n.setSelectionRange(pos,pos)};
+ document.querySelectorAll('[data-pv]').forEach(i=>i.onchange=()=>{const c=S.cat.find(x=>x.id===i.dataset.pv),v=+i.value||null;if(v===c.pv)return;
+  S.catLog.unshift({at:Date.now(),n:c.n,av:c.pv,ap:v,par:dir?'Directeur':'Boutique'});c.pv=v;save();vArt()});
+ $('#aok').onclick=()=>{const n=$('#an').value.trim();if(!n)return;if(S.cat.some(c=>c.n.toLowerCase()===n.toLowerCase())){alert('Cet article existe déjà.');return}
+  const pv=+$('#ap').value||null;S.cat.push({id:uid(),n,pv,pa:dir&&$('#aa')?(+$('#aa').value||null):null});
+  S.catLog.unshift({at:Date.now(),n:n+' (nouveau)',av:null,ap:pv,par:dir?'Directeur':'Boutique'});save();vArt()};
+}
+
+/* ===================== Vue : véhicules (sans compteur) ===================== */
+const cyrRes=()=>S.settings.pleinF/S.settings.prixL;
+function cyrLitres(){return Math.max(0,cyrRes()-S.cyrus.km*S.settings.cyrRef/100)}
+const noms=ids=>ids.map(i=>liv(i).nom).join(', ')||'personne';
+const ETAT={montee:['Sur la moto','ok'],a_charger:['À brancher','bad'],pleine:['Pleine, prête','ok']};
+function vBat(){const st=S.settings,C=S.cyrus,rL=cyrLitres(),R=cyrRes();
+ const autoC=rL/st.cyrRef*100,vidOk=C.vid&&C.vid>=periode().deb;
+ const E=S.elec,b=batMontee(),r=kmRest(),c=conseil(),full=rangeAt(b,VREF);
+ $('#app').innerHTML=`
+ <h2>Moto électrique</h2>
+ <div class="card"><div class="bat">
+  <div class="cell"><div class="fill" style="height:${r/full*100}%;background:${couleur(r)}"></div><i style="bottom:${20/full*100}%"></i><i style="bottom:${10/full*100}%"></i></div>
+  <div style="flex:1"><div class="mut">Batterie montée : ${b.ah} Ah · ${b.volt} V</div>
+   <div class="pct" style="color:${couleur(r)}">${Math.floor(r)} km</div><div class="mut">restants à 45 km/h (${Math.floor(kmRest(50))} km à 50 km/h)</div>
+   <span class="tag ${c.c}" style="margin-top:6px">${c.t}</span></div></div>
+  <div class="note ${c.c}">${c.d}</div>
+  <div class="mut">${E.km.toFixed(1)} km de livraisons depuis la batterie pleine${E.at?' ('+fmtD(E.at)+')':''} · utilisée par : ${esc(noms(E.users))}</div>
+  <h3>Les batteries</h3>
+  ${st.batteries.map(x=>{const e=E.etat[x.id]||'pleine';return `<div class="liv" style="align-items:center;margin:8px 0"><div><b>${x.ah} Ah</b><span class="mut">pleine : ${Math.floor(rangeAt(x,45))} km à 45 km/h · ${Math.floor(rangeAt(x,50))} km à 50 km/h</span></div>
+   <div style="text-align:right"><span class="tag ${ETAT[e][1]}">${ETAT[e][0]}</span><br>
+   ${e==='a_charger'?`<button class="btn sm ok" data-vert="${x.id}">Chargeur vert : pleine</button>`:''}
+   ${e==='pleine'?`<button class="btn sm" data-mont="${x.id}">Je la mets sur la moto</button>`:''}
+   ${e==='montee'?`<button class="btn sm ghost" data-rech="${x.id}">Rechargée sur la moto</button>`:''}</div></div>`}).join('')}
+  <p class="mut">Quand on met une batterie pleine sur la moto, on touche « Je la mets sur la moto » : l'appli repart de zéro avec la bonne capacité, et l'ancienne batterie passe « À brancher ».</p>
+ </div>
+ <h2>Moto Cyrus (essence)</h2>
+ <div class="card"><div class="bat">
+  <div class="cell"><div class="fill" style="height:${rL/R*100}%;background:${rL/R<0.25?'var(--bad)':rL/R<0.5?'var(--warn)':'var(--ok)'}"></div></div>
+  <div style="flex:1"><div class="mut">Essence estimée</div><div class="pct">${Math.floor(autoC)} km</div>
+  <div class="mut">≈ ${rL.toFixed(1)} L sur ${R.toFixed(1)} L · il faudrait ${F(Math.ceil((R-rL)*st.prixL/100)*100)} pour refaire le plein</div>
+  <span class="tag ${rL/R<0.25?'bad':rL/R<0.5?'warn':'ok'}">${rL/R<0.25?'Faire le plein avant la prochaine course':rL/R<0.5?'Plein à prévoir':'OK'}</span>
+  <div class="mut" style="margin-top:6px">${C.km.toFixed(1)} km de livraisons depuis le dernier plein · utilisée par : ${esc(noms(C.users))}</div></div></div>
+  <h3>Enregistrer un plein (toujours jusqu'au bord, à la station)</h3>
+  <div class="row"><div><label>Montant payé (F)</label><input id="pl_m" inputmode="numeric" placeholder="${st.pleinF}"></div><div><label>N° reçu</label><input id="pl_r"></div></div>
+  ${champPhoto('ph_pl','📷 Photo du reçu (facultatif)')}
+  <button class="btn gold" id="pl_ok">Enregistrer le plein</button>
+  <div class="liv" style="margin-top:12px;align-items:center"><span class="mut">Vidange du mois (obligatoire) : ${C.vid?fmtD(C.vid):'jamais notée'}</span>${vidOk?'<span class="tag ok">faite</span>':'<span class="tag bad">à faire</span>'}</div>
+  ${vidOk?'':`<div class="row"><input id="vid_m" inputmode="numeric" placeholder="${st.vidF} F"><button class="btn sm" style="flex:none" id="vid">Vidange faite</button></div>`}
+  ${C.pleins.length?`<div class="tbl" style="margin-top:8px"><table><tr><th>Date</th><th class="n">Km livrés</th><th class="n">Payé</th><th class="n">Attendu</th><th></th></tr>${C.pleins.slice(0,8).map(p=>`<tr><td>${fmtD(p.at)}</td><td class="n">${p.km==null?'départ':p.km.toFixed(0)}</td><td class="n">${F(p.montant)}</td><td class="n">${p.km==null?'—':F(p.att)}</td><td>${p.alerte?'<span class="tag bad">écart</span>':p.km!=null?'<span class="tag ok">OK</span>':''}</td></tr>`).join('')}</table></div>`:''}
+  ${C.pleins.filter(p=>p.alerte).slice(0,3).map(p=>`<div class="note bad">${esc(p.alerte)}</div>`).join('')}
+  <p class="mut">Plein complet = ${F(st.pleinF)} ≈ ${R.toFixed(1)} L ≈ ${Math.floor(R/st.cyrRef*100)} km. Le montant payé à chaque plein doit correspondre aux km livrés depuis le plein d'avant : sinon, alerte et noms de celles qui ont roulé.</p>
+ </div>
+ <h2>Qui fait quoi</h2>
+ <div class="card">
+ <div class="note"><b>Moto électrique qui sort :</b> la boutique choisit « Moto électrique » sur le bon. L'appli refuse si la course ne laisse pas au moins 10 km au retour.</div>
+ <div class="note warn"><b>Plus que 20 km :</b> une course proche seulement, puis changer la batterie au retour.</div>
+ <div class="note bad"><b>Plus que 10 km :</b> la moto ne sort plus. On met la batterie pleine et on branche l'autre.</div>
+ <div class="note ok"><b>Batterie pleine mise sur la moto :</b> la livreuse ou la boutique touche « Je la mets sur la moto » sur la bonne batterie (30 Ah ou 50 Ah).</div>
+ <div class="note"><b>Cyrus qui sort :</b> si l'appli dit « Faire le plein », passage à la station d'abord. Plein jusqu'au bord, reçu rapporté, montant tapé ici.</div>
+ </div>`;
+ document.querySelectorAll('[data-mont]').forEach(x=>x.onclick=()=>{const id=x.dataset.mont;
+  if(E.bat!==id)E.etat[E.bat]='a_charger';E.etat[id]='montee';E.bat=id;E.km=0;E.users=[];E.at=Date.now();save();vBat()});
+ document.querySelectorAll('[data-vert]').forEach(x=>x.onclick=()=>{E.etat[x.dataset.vert]='pleine';save();vBat()});
+ document.querySelectorAll('[data-rech]').forEach(x=>x.onclick=()=>{if(confirm('La batterie montée est pleine ?')){E.km=0;E.users=[];E.at=Date.now();save();vBat()}});
+ suivrePhoto('ph_pl');
+ $('#pl_ok').onclick=async()=>{const m=+$('#pl_m').value||st.pleinF,l=m/st.prixL;
+  const ph=$('#ph_pl').files[0];if(ph){try{await archiver(ph,{type:'Essence',label:'Plein Cyrus'+($('#pl_r').value?' · reçu '+$('#pl_r').value:''),montant:m})}catch(e){}}
+  const km=C.pleins.length?C.km:null,att=km!=null?Math.round(km*st.cyrRef/100*st.prixL):null;let al='';
+  if(km!=null&&km>=20&&m>att*1.25+300)al=`Plein du ${fmtD(Date.now())} : payé ${F(m)} pour ${km.toFixed(0)} km livrés (attendu ≈ ${F(att)}). Environ ${Math.round(l/st.cyrRef*100-km)} km non expliqués. Utilisée par : ${noms(C.users)}.`;
+  C.pleins.unshift({at:Date.now(),litres:+l.toFixed(2),montant:m,recu:$('#pl_r').value,km,att,users:[...C.users],alerte:al});
+  C.km=0;C.users=[];save();vBat()};
+ if($('#vid'))$('#vid').onclick=()=>{const m=+$('#vid_m').value||st.vidF;C.vid=Date.now();S.repa.unshift({at:Date.now(),veh:'cyrus',montant:m,motif:'vidange'});save();vBat()};
+}
+
+/* ===================== Vue : caisse moto (réparations + épargne) ===================== */
+function vCaisse(){const st=S.settings,P=periode(perRef);
+ const ep=S.epargne.reduce((a,e)=>a+e.montant,0),rep_=S.repa.reduce((a,r)=>a+r.montant,0);
+ const debut=S.epargne.length?Math.min(...S.epargne.map(e=>e.at)):Date.now();
+ const moisPasses=Math.floor((Date.now()-debut)/(30.4*86400000));
+ const moisRest=Math.max(1,st.motoMois-moisPasses),reste=Math.max(0,st.motoPrix-ep),parMois=Math.ceil(reste/moisRest/500)*500;
+ const Lp=S.livs.filter(l=>l.at>=P.deb&&l.at<P.fin&&['achete','partiel','depose'].includes(l.statut)).length;
+ const nbMois=Math.max(1,Lp||240),parLiv=Math.ceil(parMois/nbMois/50)*50;
+ const epMois=S.epargne.filter(e=>e.at>=P.deb&&e.at<P.fin).reduce((a,e)=>a+e.montant,0);
+ $('#app').innerHTML=`<h2>Épargne pour changer de moto</h2>
+ <div class="card"><div class="liv"><div><span class="mut">Objectif : ${F(st.motoPrix)} en ${st.motoMois} mois</span><div class="pct" style="color:var(--navy)">${F(ep)}</div><span class="mut">déjà mis de côté (${Math.round(ep/st.motoPrix*100)} %)</span></div></div>
+  <div style="height:12px;border-radius:6px;background:var(--soft);margin:10px 0;overflow:hidden"><div style="height:100%;width:${Math.min(100,ep/st.motoPrix*100)}%;background:var(--gold)"></div></div>
+  <div class="kpi"><div><b>${F(parMois)}</b><span>à déposer chaque mois</span></div><div><b>${F(parLiv)}</b><span>par livraison réussie (${Lp?Lp+' ce mois':'base 8 par jour'})</span></div><div><b>${F(epMois)}</b><span>déposé ce mois (${P.lib})</span></div></div>
+  <div class="note">Règle simple : sur chaque livraison réussie, mettre ${F(parLiv)} de côté, sur un compte OM ou une boîte à part, jamais dans la caisse. Le dépôt se fait le 14 avec le bilan.</div>
+  <div class="row"><div><label>Montant déposé (F)</label><input id="ep_m" inputmode="numeric"></div><div><label>Où (OM, banque…)</label><input id="ep_n"></div></div>
+  <button class="btn gold" id="ep_ok">Enregistrer le dépôt</button>
+  ${S.epargne.slice(0,6).map(e=>`<div class="liv mut" style="margin-top:6px"><span>${fmtD(e.at)} · ${esc(e.note)}</span><b>${F(e.montant)}</b></div>`).join('')}</div>
+ <h2>Réparations et entretien</h2>
+ <div class="card">
+  <label>Véhicule</label><select id="rp_v"><option value="cyrus">Moto Cyrus</option><option value="elec">Moto électrique</option><option value="b30">Batterie 30 Ah</option><option value="b50">Batterie 50 Ah</option></select>
+  <div class="row"><div><label>Montant (F)</label><input id="rp_m" inputmode="numeric"></div><div><label>Motif</label><select id="rp_n">${["Pneu / chambre à air","Freins","Chaîne / pignons","Éclairage / électricité","Batterie (réparation)","Chargeur","Papiers / assurance / vignette","Lavage","Autre réparation"].map(x=>`<option>${x}</option>`).join("")}</select></div></div>
+  ${champPhoto('ph_rp','📷 Photo de la facture (facultatif)')}
+  <button class="btn" id="rp_ok">Enregistrer la dépense</button>
+  ${S.repa.slice(0,10).map(r=>`<div class="liv mut" style="margin-top:6px"><span>${fmtD(r.at)} · ${esc({cyrus:'Cyrus',elec:'Moto élec.',b30:'Batt. 30 Ah',b50:'Batt. 50 Ah'}[r.veh])} · ${esc(r.motif)}</span><b>${F(r.montant)}</b></div>`).join('')}
+  <p class="mut">Total depuis le début : ${F(rep_)}. Le bilan du mois les déduit du bénéfice des livraisons.</p></div>
+ <h2>Archives des reçus (${(S.recus||[]).length})</h2>
+ ${(S.recus||[]).length?`<div class="card"><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px">${S.recus.slice(0,60).map(r=>`<button data-ph="${r.k}" style="border:1px solid var(--line);border-radius:10px;background:var(--soft);padding:0;overflow:hidden;text-align:left;color:var(--ink)">${r.k?`<img alt="" data-im="${r.k}" style="width:100%;height:90px;object-fit:cover;display:block">`:`<span style="display:grid;place-items:center;height:90px;font-size:12px;padding:6px;text-align:center">${esc(r.label)}</span>`}<span style="display:block;font-size:11px;padding:4px 6px">${esc(r.type)} · ${new Date(r.at).toLocaleDateString('fr-FR')}<br>${r.montant?F(r.montant):''}</span></button>`).join('')}</div></div>`:'<p class="mut">Les photos des reçus de gare, d\'essence et de réparations s\'archivent ici, dans ce téléphone.</p>'}
+ <div id="ov" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:20;display:flex;align-items:center;justify-content:center;padding:16px"><img id="ovi" alt="Reçu" style="max-width:100%;max-height:85vh;border-radius:8px"></div>`;
+ document.querySelectorAll('[data-im]').forEach(async im=>{try{const b=await photoGet(im.dataset.im);if(b)im.src=URL.createObjectURL(b)}catch(e){}});
+ document.querySelectorAll('[data-ph]').forEach(b=>b.onclick=async()=>{if(b.dataset.ph==='null')return;const x=await photoGet(b.dataset.ph);if(!x)return;$('#ovi').src=URL.createObjectURL(x);$('#ov').classList.remove('hide');$('#ov').style.display='flex'});
+ if($('#ov'))$('#ov').onclick=()=>{$('#ov').style.display='none'};
+ suivrePhoto('ph_rp');
+ $('#ep_ok').onclick=()=>{const m=+$('#ep_m').value;if(!m)return;S.epargne.unshift({at:Date.now(),montant:m,note:$('#ep_n').value||'dépôt'});save();vCaisse()};
+ $('#rp_ok').onclick=async()=>{const m=+$('#rp_m').value;if(!m)return;const ph=$('#ph_rp').files[0];
+  if(ph){try{await archiver(ph,{type:'Réparation',label:$('#rp_n').value,montant:m})}catch(e){}}S.repa.unshift({at:Date.now(),veh:$('#rp_v').value,montant:m,motif:$('#rp_n').value||'réparation'});save();vCaisse()};
+}
+
+/* ===================== Vue : bilan 15 → 14 ===================== */
+let perRef=null;
+function vBilan(){const st=S.settings,P=periode(perRef);
+ const L=S.livs.filter(l=>l.at>=P.deb&&l.at<P.fin&&l.statut!=='annule'&&l.statut!=='en_cours');
+ const rows=st.livreurs.map(v=>{const m=L.filter(l=>l.livreur===v.id);
+  const jours=[...new Set(m.map(l=>new Date(l.at).toDateString()))];
+  const ok=m.filter(l=>(l.statut==='achete'||l.statut==='partiel'||l.statut==='depose')&&!l.alertes.some(a=>a.startsWith('Code client faux')));
+  let prime=0;if(!st.mesure){for(const j of jours){const n=ok.filter(l=>new Date(l.at).toDateString()===j).length;prime+=Math.max(0,n-st.quota)*st.prime}}
+  const indem=m.reduce((s,l)=>s+(l.indem||0),0),km=m.reduce((s,l)=>s+(l.kmAR||0),0),fr=m.reduce((s,l)=>s+(l.frais||0),0);
+  const cout=m.reduce((s,l)=>s+coutCourse(l),0),ventes=m.reduce((s,l)=>s+(l.encaisse||0),0);
+  const du=m.filter(l=>!l.remis).reduce((s,l)=>s+(l.encaisse||0),0),al=m.reduce((s,l)=>s+l.alertes.length,0);
+  return {v,j:jours.length,n:m.length,ok:ok.length,part:m.filter(l=>l.statut==='partiel').length,ko:m.filter(l=>l.statut==='pas_achete').length,km,prime,indem,du,al,fr,cout,ventes,benef:fr-cout-prime}});
+ const T=k=>rows.reduce((a,r)=>a+r[k],0);
+ const repa=S.repa.filter(r=>r.at>=P.deb&&r.at<P.fin).reduce((a,r)=>a+r.montant,0);
+ const epar=S.epargne.filter(e=>e.at>=P.deb&&e.at<P.fin).reduce((a,e)=>a+e.montant,0);
+ const vidFaite=S.repa.some(r=>r.motif==='vidange'&&r.at>=P.deb&&r.at<P.fin),vidPrev=vidFaite?0:st.vidF;
+ const net=T('benef')-repa-vidPrev-epar-st.coutLivreurs;
+ const act=rows.filter(r=>r.n);
+ const best=(k,f=x=>x[k])=>act.length?act.slice().sort((a,b)=>f(b)-f(a))[0]:null;
+ const bL=best('ok'),bT=best('t',r=>r.n>=3?r.ok/r.n:-1),bB=best('benef'),bK=best('km');
+ const raisons={};L.filter(l=>l.statut==='pas_achete').forEach(l=>raisons[l.raisonEchec||'?']=(raisons[l.raisonEchec||'?']||0)+1);
+ const gare=L.filter(l=>l.type==='gare');
+ const pl=S.cyrus.pleins.filter(p=>p.at>=P.deb&&p.at<P.fin),essence=pl.reduce((a,p)=>a+p.montant,0);
+ $('#app').innerHTML=`<div class="liv" style="align-items:center"><button class="btn sm ghost" id="pv">‹ Mois préc.</button><b>${P.lib}</b><button class="btn sm ghost" id="nx">Mois suiv. ›</button></div>
+ ${st.mesure?'<div class="note">Mois de mesure : les primes ne sont pas versées. Les chiffres servent à fixer le quota et la prime.</div>':''}
+ <h2>Classement du mois</h2>
+ ${act.length?`<div class="card">
+  ${bL?`<div class="liv"><span>Plus de livraisons réussies</span><b>${esc(bL.v.nom)} · ${bL.ok}</b></div>`:''}
+  ${bT&&bT.n>=3?`<div class="liv"><span>Meilleur taux de réussite</span><b>${esc(bT.v.nom)} · ${Math.round(bT.ok/bT.n*100)} %</b></div>`:''}
+  ${bK?`<div class="liv"><span>Plus de kilomètres</span><b>${esc(bK.v.nom)} · ${bK.km.toFixed(0)} km</b></div>`:''}
+  ${bB?`<div class="liv"><span>Plus gros bénéfice apporté</span><b>${esc(bB.v.nom)} · ${F(bB.benef)}</b></div>`:''}
+  <div class="tbl" style="margin-top:10px"><table><tr><th>Livreur</th><th class="n">Réussies</th><th class="n">Taux</th><th class="n">Ventes livrées</th><th class="n">Bénéfice</th></tr>
+  ${act.slice().sort((a,b)=>b.ok-a.ok||b.benef-a.benef).map((r,i)=>`<tr><td>${i+1}. ${esc(r.v.nom)}</td><td class="n">${r.ok}</td><td class="n">${Math.round(r.ok/r.n*100)} %</td><td class="n">${F(r.ventes)}</td><td class="n"><b>${F(r.benef)}</b></td></tr>`).join('')}</table></div>
+  <p class="mut">Bénéfice d'une livreuse = frais de livraison encaissés − essence ou électricité de ses courses − sa prime.</p></div>`:'<p class="mut">Aucune course terminée sur cette période.</p>'}
+ <h2>Résultat du service livraison</h2>
+ <div class="card tbl"><table>
+  <tr><td>Frais de livraison encaissés${L.filter(l=>l.offert).length?` <span class="mut">(${L.filter(l=>l.offert).length} livraison(s) offerte(s))</span>`:''}</td><td class="n">${F(T('fr'))}</td></tr>
+  <tr><td>Essence, électricité, indemnités (courses)</td><td class="n">− ${F(T('cout'))}</td></tr>
+  <tr><td>Primes</td><td class="n">− ${F(T('prime'))}</td></tr>
+  <tr><td>Réparations et entretien (vidange comprise)</td><td class="n">− ${F(repa)}</td></tr>
+  ${vidPrev?`<tr><td style="color:var(--bad)">Vidange du mois pas encore faite (prévue)</td><td class="n">− ${F(vidPrev)}</td></tr>`:''}
+  <tr><td>Épargne moto déposée</td><td class="n">− ${F(epar)}</td></tr>
+  <tr><td>Salaires et rations des livreurs</td><td class="n">− ${F(st.coutLivreurs)}</td></tr>
+  <tr><td><b>Résultat</b></td><td class="n"><b style="color:${net>=0?'var(--ok)':'var(--bad)'}">${F(net)}</b></td></tr></table>
+  <p class="mut">Contrôle : pleins Cyrus payés ce mois ${F(essence)}. Ventes de chaussures livrées : ${F(T('ventes'))}.</p></div>
+ <h2>Détail par livreur</h2>
+ ${rows.map(r=>`<div class="card"><div class="liv"><b style="font-size:17px;color:var(--navy)">${esc(r.v.nom)}</b><span class="tag ${r.al?'bad':'ok'}">${r.al} alerte(s)</span></div>
+  <div class="tbl"><table>
+  <tr><td>Jours de livraison</td><td class="n">${r.j}</td></tr>
+  <tr><td>Réussies / en partie / ratées</td><td class="n">${r.ok} / ${r.part} / ${r.ko}</td></tr>
+  <tr><td>Moyenne par jour</td><td class="n">${r.j?(r.ok/r.j).toFixed(1):0} (quota ${st.quota})</td></tr>
+  <tr><td>Km aller-retour</td><td class="n">${r.km.toFixed(1)} km</td></tr>
+  <tr><td>Frais encaissés</td><td class="n">${F(r.fr)}</td></tr>
+  <tr><td>Coût des courses</td><td class="n">− ${F(r.cout)}</td></tr>
+  <tr><td>Bénéfice apporté</td><td class="n"><b>${F(r.benef)}</b></td></tr>
+  <tr><td>Argent pas encore remis</td><td class="n" style="color:${r.du?'var(--bad)':'inherit'}">${F(r.du)}</td></tr>
+  <tr><td><b>À payer en plus du salaire</b></td><td class="n"><b>${F(r.prime+r.indem)}</b> <span class="mut">(prime ${F(r.prime)}${r.indem?' + moto perso '+F(r.indem):''})</span></td></tr></table></div></div>`).join('')}
+ ${Object.keys(raisons).length?`<h3>Raisons des « pas acheté »</h3><div class="card">${Object.entries(raisons).map(([k,v])=>`<div class="liv"><span>${esc(k)}</span><b>${v}</b></div>`).join('')}</div>`:''}
+ ${pl.some(p=>p.alerte)?`<h3>Alertes essence</h3>${pl.filter(p=>p.alerte).map(p=>`<div class="note bad">${esc(p.alerte)}</div>`).join('')}`:''}
+ ${gare.length?`<h3>Courses gare</h3><div class="card">${gare.map(g=>`<div class="liv"><span>${esc(g.cl)} · reçu ${esc(g.recu)}</span><b>${F(g.frais)} − ${F(g.ticket)} = ${F(g.frais-g.ticket)}</b></div>`).join('')}<p class="mut">Client ${F(st.gare.client)} − (gare + société). La part payée par la boutique apparaît en négatif, essence en plus.</p></div>`:''}`;
+ $('#pv').onclick=()=>{perRef=P.deb-86400000;vBilan()};$('#nx').onclick=()=>{perRef=P.fin+86400000;vBilan()};}
+
+/* ===================== Vue : réglages ===================== */
+function vReg(){const st=S.settings;
+ $('#app').innerHTML=`<h2>Boutique</h2><div class="card">
+ <div>${st.shopOk?`Position exacte enregistrée : ${st.shop[0].toFixed(5)}, ${st.shop[1].toFixed(5)}`:'<b style="color:var(--warn)">Position approximative (Pédiatrie Charles de Gaulle)</b>. La caissière l\'enregistre depuis la boutique, dans « Nouveau bon ».'}</div>
+ <label>Ou coller un lien Google Maps de la boutique</label><div class="row"><input id="s_pos" placeholder="lien ou 12.37…, -1.47…"><button class="btn sm" style="flex:none" id="posLien">Utiliser</button></div>
+ <button class="btn sm ghost" id="resetShop">Refaire la position depuis la boutique</button>
+ <label>WhatsApp du Directeur (reçoit le point du jour)</label><input id="s_wd" value="${esc(st.waDir)}">
+ <label>WhatsApp de la boutique (reçoit les retours)</label><input id="s_wa" value="${esc(st.waBoutique)}">
+ <label>Lien de l'application en ligne (facultatif, pour des bons cliquables)</label><input id="s_url" value="${esc(st.baseUrl)}" placeholder="https://…/rc-livraison.html"></div>
+ <h2>Livreurs</h2><div class="card">${st.livreurs.map((l,i)=>`<div class="row"><input data-ln="${i}" value="${esc(l.nom)}"><input data-lt="${i}" inputmode="tel" placeholder="WhatsApp 226…" value="${esc(l.tel)}"></div>`).join('<div style="height:8px"></div>')}
+ <button class="btn sm ghost" id="addL">Ajouter un livreur</button></div>
+ <h2>Accès</h2><div class="card"><div>Ce téléphone : <b>${role==='livreuse'?'livreur':role==='boutique'?'boutique':'non choisi'}</b></div>
+ <button class="btn sm ghost" id="chRole">Changer l'usage de ce téléphone</button>
+ <label>Nouveau code Directeur (laisser vide pour garder l'actuel)</label><input id="s_pin" type="password" inputmode="numeric" maxlength="6"></div>
+ <h2>Frais de livraison</h2><div class="card">
+ <div class="row"><div><label>Frais de base (F)</label><input id="t_b" inputmode="numeric" value="${st.tarif.base}"></div><div><label>Jusqu'à (km, tolérance)</label><input id="t_t" inputmode="decimal" value="${st.tarif.tol}"></div></div>
+ <div class="row"><div><label>Ensuite + (F)</label><input id="t_p" inputmode="numeric" value="${st.tarif.plus}"></div><div><label>par tranche de (km)</label><input id="t_k" inputmode="numeric" value="${st.tarif.pas}"></div></div>
+ <div class="tbl" style="margin-top:8px"><table>${grille().map(([a,b])=>`<tr><td>${a}</td><td class="n">${F(b)}</td></tr>`).join('')}</table></div></div>
+ <h2>Épargne moto</h2><div class="card"><div class="row"><div><label>Prix d'une moto neuve (F)</label><input id="m_p" inputmode="numeric" value="${st.motoPrix}"></div><div><label>En combien de mois</label><input id="m_m" inputmode="numeric" value="${st.motoMois}"></div></div>
+ <h3>Envoi province</h3><div class="row"><div><label>Payé par le client</label><input id="g_c" inputmode="numeric" value="${st.gare.client}"></div><div><label>Ticket gare</label><input id="g_t" inputmode="numeric" value="${st.gare.ticket}"></div><div><label>Société</label><input id="g_s" inputmode="numeric" value="${st.gare.societe}"></div></div>
+ <label>Vidange Cyrus chaque mois (F)</label><input id="s_vd" inputmode="numeric" value="${st.vidF}">
+ <label>Prix du kWh (électricité, F)</label><input id="s_kw" inputmode="numeric" value="${st.kwhF}"></div>
+ <h2>Primes et coûts</h2><div class="card">
+ <div class="row"><div><label>Quota / jour</label><input id="s_q" inputmode="numeric" value="${st.quota}"></div><div><label>Prime au-delà (F)</label><input id="s_p" inputmode="numeric" value="${st.prime}"></div></div>
+ <div class="row"><div><label>Coût au km moto perso (F)</label><input id="s_k" inputmode="numeric" value="${st.coutKm}"></div><div><label>Coût livreurs / mois (F)</label><input id="s_c" inputmode="numeric" value="${st.coutLivreurs}"></div></div>
+ <div class="row"><div><label>Cyrus : plein complet (F)</label><input id="s_pf" inputmode="numeric" value="${st.pleinF}"></div><div><label>Prix du litre (F)</label><input id="s_pl" inputmode="numeric" value="${st.prixL}"></div><div><label>Conso. (L/100 km)</label><input id="s_cr" inputmode="decimal" value="${st.cyrRef}"></div></div>
+ <label><input type="checkbox" id="s_cc" style="width:auto" ${st.codeClient?'checked':''}> Demander le code à 4 chiffres au client (contrôle renforcé)</label>
+ <label>Appel de contrôle : 1 livraison sur</label><input id="s_ct" inputmode="numeric" value="${st.ctrl||5}">
+ <label><input type="checkbox" id="s_m" style="width:auto" ${st.mesure?'checked':''}> Mois de mesure (pas de prime)</label></div>
+ <h2>Motos électriques</h2><div class="card">
+ ${st.batteries.map((b,i)=>`<h3>${esc(b.nom)}</h3><div class="row"><div><label>Ampère-heure</label><input data-bah="${i}" inputmode="decimal" value="${b.ah}"></div><div><label>Km à 42 km/h</label><input data-bkm="${i}" inputmode="numeric" value="${b.km42}"></div></div>`).join('')}
+ <p class="mut">La 50 Ah est estimée à 133 km à 42 km/h par proportion avec la 30 Ah (80 km). Corrigez après les premiers vrais trajets.</p></div>
+ <button class="btn gold" id="sv">Enregistrer les réglages</button>
+ <h2>Sauvegarde</h2><div class="card"><p class="mut">Copiez ce texte et envoyez-le-vous sur WhatsApp. Pour restaurer, collez-le puis touchez « Restaurer ».</p>
+ <textarea id="bk">${esc(JSON.stringify(S))}</textarea><button class="btn sm ghost" id="rs">Restaurer</button></div>`;
+ $('#posLien').onclick=()=>{const p=parsePos($('#s_pos').value);if(!p){alert('Lien sans coordonnées.');return}st.shop=p;st.shopOk=true;save();vReg()};
+ $('#resetShop').onclick=()=>{st.shopOk=false;save();alert('La caissière pourra réenregistrer la position dans « Nouveau bon ».');vReg()};
+ $('#chRole').onclick=()=>{try{localStorage.removeItem('rcliv_role')}catch(e){}role=null;dir=false;render()};
+ $('#addL').onclick=()=>{st.livreurs.push({id:uid(),nom:'Nouveau',tel:''});save();vReg()};
+ $('#sv').onclick=()=>{st.waBoutique=telNorm($('#s_wa').value);st.waDir=telNorm($('#s_wd').value);st.baseUrl=$('#s_url').value.trim();
+  document.querySelectorAll('[data-ln]').forEach(i=>st.livreurs[i.dataset.ln].nom=i.value.trim()||'Sans nom');
+  document.querySelectorAll('[data-lt]').forEach(i=>st.livreurs[i.dataset.lt].tel=telNorm(i.value));
+  st.livreurs=st.livreurs.filter(l=>l.nom!=='Sans nom');
+  st.quota=+$('#s_q').value||6;st.prime=+$('#s_p').value||0;st.coutKm=+$('#s_k').value||20;st.coutLivreurs=+$('#s_c').value||0;st.mesure=$('#s_m').checked;st.codeClient=$('#s_cc').checked;st.ctrl=Math.max(2,+$('#s_ct').value||5);st.cyrRef=+String($('#s_cr').value).replace(',','.')||2.5;st.pleinF=+$('#s_pf').value||3000;st.tarif={base:+$('#t_b').value||1000,tol:+String($('#t_t').value).replace(',','.')||11,seuil:10,pas:+$('#t_k').value||5,plus:+$('#t_p').value||500};st.motoPrix=+$('#m_p').value||850000;st.motoMois=+$('#m_m').value||12;st.kwhF=+$('#s_kw').value||120;st.vidF=+$('#s_vd').value||3500;st.gare={client:+$('#g_c').value||1500,ticket:+$('#g_t').value||1000,societe:+$('#g_s').value||1000};if($('#s_pin').value.length>=4)st.pin=$('#s_pin').value;st.prixL=+$('#s_pl').value||850;
+  document.querySelectorAll('[data-bah]').forEach(i=>st.batteries[i.dataset.bah].ah=+i.value||30);
+  document.querySelectorAll('[data-bkm]').forEach(i=>st.batteries[i.dataset.bkm].km42=+i.value||80);
+  st.batteries.forEach(b=>b.nom=`Moto électrique ${b.ah} Ah`);save();alert('Réglages enregistrés.');vReg()};
+ $('#rs').onclick=()=>{try{const o=JSON.parse($('#bk').value);if(!o.settings)throw 0;if(confirm('Remplacer toutes les données de ce téléphone ?')){S=o;save();load();vReg()}}catch(e){alert('Texte de sauvegarde invalide.')}};
+}
+
+/* ===================== Démarrage (liens cliquables si hébergé) ===================== */
+(function(){try{const hosted=/^https:$/.test(location.protocol)&&!/claude|anthropic/.test(location.hostname);
+  if(hosted){if(!S.settings.baseUrl){S.settings.baseUrl=location.origin+location.pathname;save()}
+   if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+   }}catch(e){}})();
+(function(){const h=decodeURIComponent(location.hash||'');
+ const b=h.match(/RCB:([A-Za-z0-9_-]+)/),r=h.match(/RCR:([A-Za-z0-9_-]+)/);
+ if(b){try{bonRecu=dec(b[1]);tab='livreuse'}catch(e){}}
+ else if(r){pasteMsg='RCR:'+r[1];tab='cours'}
+ render()})();
+</script>
+</body>
+</html>
