@@ -62,6 +62,11 @@ td.n,th.n{text-align:right}
 .kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-top:8px}
 .kpi div{background:var(--soft);border-radius:10px;padding:10px}.kpi b{display:block;font-size:18px;color:var(--navy)}.kpi span{font-size:12px;color:var(--mut)}
 .hide{display:none}
+.miss{border-color:var(--bad)!important;background:var(--badl)!important}
+.chips.miss{outline:2px solid var(--bad);outline-offset:4px;border-radius:12px}
+.loc{border:2px solid var(--gold);background:var(--goldl)}
+.loc h3{margin-top:0;color:var(--navy)}
+.recap{border:2px solid var(--ok)}
 :focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 </style>
 </head>
@@ -119,7 +124,7 @@ function frais(k,t=S.settings.tarif){if(k<=t.tol)return t.base;return t.base+t.p
 function grille(){const t=S.settings.tarif,out=[[`0 à ${t.tol} km`,t.base]];for(let a=t.seuil,i=1;i<=5;i++,a+=t.pas){out.push([`${i===1?t.tol:a} à ${a+t.pas} km`,t.base+t.plus*i])}return out}
 function coutKmVeh(v){const st=S.settings;if(v==='cyrus')return st.prixL*st.cyrRef/100;if(v==='elec')return whKm(batMontee(),45)/1000*st.kwhF;if(v==='perso')return st.coutKm;return 0}
 const coutCourse=l=>l.cout!=null?l.cout:Math.round((l.kmAR||0)*coutKmVeh(l.veh));
-function parsePos(t){if(!t)return null;const m=String(t).match(/(-?\d{1,2}\.\d{3,})\s*,\s*(-?\d{1,3}\.\d{3,})/);return m?[+m[1],+m[2]]:null}
+function parsePos(t){if(!t)return null;let s=String(t);try{s=decodeURIComponent(s.replace(/\+/g,' '))}catch(e){}const m=s.match(/(-?\d{1,2}\.\d{3,})\s*,\s*(-?\d{1,3}\.\d{3,})/);return m?[+m[1],+m[2]]:null}
 function gps(){return new Promise((ok,ko)=>{if(!navigator.geolocation)return ko(new Error('GPS indisponible sur ce téléphone'));
  navigator.geolocation.getCurrentPosition(p=>ok([p.coords.latitude,p.coords.longitude,p.coords.accuracy]),e=>ko(e),{enableHighAccuracy:true,timeout:20000,maximumAge:0})})}
 const sms=(num,txt)=>'sms:'+(num?'+'+String(num).replace(/\D/g,''):'')+'?body='+encodeURIComponent(txt);
@@ -203,14 +208,134 @@ function ouvrirDir(){const st=S.settings;
   else if(v!==st.pin){$('#pm').innerHTML='<div class="note bad">Code faux.</div>';return}
   dir=true;tab=role==='directeur'?'recu':'bilan';render()}}
 
+/* ===================== Prix de la boutique (catalogue de la caisse « Royaum' des Comptes ») ===================== */
+const nz=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[’']/g,' ').replace(/[^a-z0-9+ ]/g,' ').replace(/\s+/g,' ').trim();
+const km1=k=>k.toFixed(1).replace('.',',');
+const cap=s=>String(s||'').trim().split(' ').filter(Boolean).map(w=>w[0].toUpperCase()+w.slice(1)).join(' ');
+function catCaisse(){try{const c=JSON.parse(localStorage.getItem('rdc:cat'));return Array.isArray(c)?c:[]}catch(e){return[]}}
+function catNoms(){const m=new Map();for(const c of catCaisse())if(c&&c.n)m.set(nz(c.n),c.n);for(const c of S.cat)if(!m.has(nz(c.n)))m.set(nz(c.n),c.n);return [...m.values()].sort((a,b)=>a.localeCompare(b,'fr'))}
+// Mêmes règles que la caisse : prix fixe (ou promo) et grille d'avantages envoyée par le Directeur (champs bon / vip)
+const tier=g=>g>=7500?2000:g>=6500?1500:g>=5500?1000:g>=4500?500:0;
+const vipT=g=>g<4500?0:Math.max(tier(g),Math.min(3000,Math.floor((g-4000)/500)*500));
+const ACC=['chaussette','cirage','chausse-pied','ceinture cuir','ceinture simple'].map(nz);
+const isAccN=n=>ACC.includes(nz(n));
+function prixBoutique(n){const k=nz(n);if(!k)return null;const c=catCaisse().find(x=>x&&nz(x.n)===k);
+ if(c){const pv=+(c.promo||c.p)||0;if(pv>0)return{pv,promo:!!c.promo,bon:+c.bon||0,vip:+c.vip||0,src:'caisse'}}
+ const l=S.cat.find(x=>nz(x.n)===k);if(!l||!l.pv)return null;const g=l.pa?l.pv-l.pa:0;
+ return{pv:+l.pv,promo:false,bon:g?tier(g):0,vip:g?vipT(g):0,src:'livraison'}}
+// Niveau du client, lu dans les ventes de la caisse (reçus envoyés depuis 1 an) — même calcul que la caisse
+function niveauClient(tel){const t=telNorm(tel);if(t.length<11)return null;let n=0,any=0;const lim=new Date();lim.setDate(lim.getDate()-365);const L=lim.toLocaleDateString('fr-CA');
+ for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(!k||!k.startsWith('rdc:jour:')||k.slice(9)<L)continue;let o=null;try{o=JSON.parse(localStorage.getItem(k))}catch(e){}
+  ((o&&o.ventes)||[]).forEach(v=>{if(v.client===t&&!v.acc&&(v.recu==='envoye'||v.recu==='sms')){any+=v.qte;if(v.prixVendu>=15000)n+=v.qte}})}
+ return any?{lvl:n>=4?'royal':'fidele',n}:{lvl:'non',n:0}}
+function autoFid(){if(draft.fidMan)return;const nv=niveauClient(draft.tel);draft.fid=nv?nv.lvl:'non';draft.fidN=nv?nv.n:0;draft.fidAuto=!!(nv&&nv.lvl!=='non')}
+// Un seul avantage par paire, hors promo et accessoires : ancien client = toutes ses paires ; nouveau client = toutes sauf la première
+function prixDraft(){autoFid();const mode=draft.fid||'non';let shoes=0;
+ for(const it of draft.items){const pb=prixBoutique(it.a),acc=it.a.trim()&&isAccN(it.a);
+  if(!pb){it.pn=null;it.av=0;it.promo=false;if(it.auto&&!it.man){it.x='';it.auto=false}if(it.a.trim()&&!acc)shoes++;continue}
+  let av=0;if(!acc&&!pb.promo){const val=mode==='royal'?(pb.vip||pb.bon):pb.bon;if(val&&(mode!=='non'||shoes>=1))av=val}
+  if(!acc)shoes++;
+  it.pn=pb.pv;it.av=av;it.promo=pb.promo;if(!it.man){it.x=String(pb.pv-av);it.auto=true}}}
+function infoItems(){const lib={royal:'Client Royal',fidele:'client fidèle'}[draft.fid]||'2e paire';
+ draft.items.forEach((it,i)=>{const z=document.querySelector(`[data-ii="${i}"]`);if(!z)return;
+  if(it.pn){const att=it.pn-(it.av||0);z.innerHTML=`${it.promo?'Prix promo':'Prix boutique'} ${F(it.pn)}${it.av?` · avantage ${lib} −${F(it.av)}`:''}${it.man&&+it.x!==att?` · <b style="color:var(--warn)">prix changé à la main</b>`:''}`}
+  else z.innerHTML=it.a.trim()?'<span style="color:var(--bad)">Pas dans la caisse : tapez le prix</span>':''});
+ document.querySelectorAll('[data-fd]').forEach(b=>b.classList.toggle('on',b.dataset.fd===(draft.fid||'non')));
+ const f=$('#fidInfo');if(f)f.innerHTML=draft.fidAuto?`<div class="note ok">${draft.fid==='royal'?'👑 Client Royal reconnu':'⭐ Client fidèle reconnu'} : ${draft.fidN} paire(s) de 15 000 F ou plus en 1 an${draft.fid==='fidele'?' (Royal à 4)':''}.</div>`:draft.fidMan&&draft.fid!=='non'?'<div class="note warn">Avantage choisi à la main : vérifiez le reçu-bon du client.</div>':''}
+
+/* ===================== Quartiers de Ouagadougou (estimation si pas de localisation) ===================== */
+const QUARTIERS={"Bassinko":[12.42,-1.62],"Balkuy":[12.305,-1.465],"Bendogo":[12.383,-1.45],"Bilbalogho":[12.368,-1.533],"Bissighin":[12.37,-1.615],"Boulmiougou":[12.34,-1.6],"Centre-ville":[12.3686,-1.5275],"Cissin":[12.335,-1.545],"Dagnoën":[12.382,-1.496],"Dapoya":[12.377,-1.529],"Dassasgho":[12.375,-1.47],"Gounghin":[12.362,-1.545],"Hamdalaye":[12.385,-1.545],"Kalgondin":[12.35,-1.5],"Kamboinsin":[12.46,-1.55],"Kamsonghin":[12.357,-1.525],"Karpala":[12.33,-1.465],"Kilwin":[12.4,-1.57],"Kossodo":[12.43,-1.485],"Koulouba":[12.376,-1.515],"Larlé":[12.38,-1.535],"Nagrin":[12.305,-1.55],"Nioko":[12.42,-1.445],"Nonsin":[12.41,-1.535],"Ouaga 2000":[12.315,-1.495],"Ouidi":[12.38,-1.523],"Paspanga":[12.38,-1.509],"Patte d'Oie":[12.333,-1.518],"Pissy":[12.345,-1.575],"Rimkiéta":[12.39,-1.59],"Saaba":[12.375,-1.415],"Samandin":[12.358,-1.535],"Sandogo":[12.325,-1.57],"Sig-Noghin":[12.395,-1.565],"Somgandé":[12.41,-1.5],"Taabtenga":[12.37,-1.45],"Tampouy":[12.405,-1.55],"Tanghin":[12.398,-1.515],"Wayalghin":[12.36,-1.465],"Wemtenga":[12.37,-1.488],"Yamtenga":[12.355,-1.42],"Zagtouli":[12.31,-1.63],"Zogona":[12.378,-1.496],"Zone 1":[12.388,-1.472],"Zone du Bois":[12.372,-1.5]};
+const QALIAS={ouagadeuxmille:'Ouaga 2000',ouaga2000:'Ouaga 2000',zoneun:'Zone 1',centreville:'Centre-ville',centre:'Centre-ville',marche:'Centre-ville'};
+function qTrouver(s){const c=nz(s).replace(/ /g,'');if(c.length<3)return null;if(QALIAS[c])return QALIAS[c];let b=null,bk='';
+ for(const n in QUARTIERS){const k=nz(n).replace(/ /g,'');if((c===k||c.startsWith(k)||(k.startsWith(c)&&c.length>=4))&&k.length>bk.length){b=n;bk=k}}
+ if(b)return b;let bd=9;for(const n in QUARTIERS){const k=nz(n).replace(/ /g,''),d=lev(c,k);if(k.length>=5&&d<=2&&d<bd){bd=d;b=n}}return b}
+function qCoord(s){const n=s&&qTrouver(s);return n?{n,c:QUARTIERS[n]}:null}
+// Distance avant le départ : localisation collée en priorité, sinon quartier. Les vrais km restent ceux du GPS du livreur.
+function distEstim(){const sh=S.settings.shop;if(!sh||draft.type!=='client')return null;const p=parsePos(draft.pos);
+ if(p)return{k:route(sh,p),src:'loc'};const q=qCoord(draft.qr);return q?{k:route(sh,q.c),src:'qr',nom:q.n}:null}
+function fraisBon(){if(draft.type==='gare')return null;if(draft.fm!=='auto')return +draft.fm;const d=distEstim();return d?frais(d.k):null}
+function msgClient(){const its=draft.items.filter(i=>i.a.trim()&&+i.x),fr=fraisBon(),d=distEstim(),art=its.reduce((a,i)=>a+(+i.x),0),t=S.settings.tarif;
+ const lv=draft.livreur?liv(draft.livreur).nom:'',L=['RC ELEGANCE – Votre livraison 🛵',''];
+ its.forEach(i=>L.push(`• ${i.a.trim()}${i.p?' (pointure '+i.p+')':''} : ${F(+i.x)}${i.av&&!i.man?' (fidélité −'+F(i.av)+')':''}`));
+ L.push('',fr==null?'Livraison : selon la distance':fr===0?'Livraison : offerte 🎁':'Livraison : '+F(fr));
+ L.push(fr==null?`Total à payer à la livraison : ${F(art)} + livraison`:`Total à payer à la livraison : ${F(art+fr)}`);
+ if(d)L.push('',`Vous êtes à ${d.src==='qr'?'environ ':''}${km1(d.k)} km de la boutique (par la route).`);
+ L.push(`Livraison : jusqu'à ${t.seuil} km ${F(t.base)}, de ${t.seuil} à ${t.seuil+t.pas} km ${F(t.base+t.plus)}, de ${t.seuil+t.pas} à ${t.seuil+2*t.pas} km ${F(t.base+2*t.plus)}, puis +${F(t.plus)} par tranche de ${t.pas} km.`);
+ L.push('',`Votre livreur${lv?' '+lv:''} viendra vous livrer avec plaisir.`,'📞 70 80 17 30');return L.join('\n')}
+
+/* ===================== Saisie vocale du bon ===================== */
+const NB={un:1,deux:2,trois:3,quatre:4,cinq:5,six:6,sept:7,huit:8,neuf:9};
+function chiffres(s){return s.replace(/\b(trente|quarante) et un\b/g,(m,d)=>d==='trente'?'31':'41')
+ .replace(/\b(trente|quarante) (deux|trois|quatre|cinq|six|sept|huit|neuf)\b/g,(m,d,u)=>String((d==='trente'?30:40)+NB[u]))
+ .replace(/\btrente\b/g,'30').replace(/\bquarante\b/g,'40')}
+function lev(a,b){const d=Array.from({length:a.length+1},(_,i)=>[i]);for(let j=1;j<=b.length;j++)d[0][j]=j;
+ for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[a.length][b.length]}
+function trouverModele(ch){const noms=catNoms().map(n=>[n,nz(n)]);let best=null;
+ for(const [n,k] of noms)if((' '+ch+' ').includes(' '+k+' ')&&(!best||k.length>best[1].length))best=[n,k];
+ if(best)return best[0];
+ const w=ch.replace(/\d+/g,' ').replace(/\b(pointure|paire|paires|une|un|la|le|les|de|des|du|modele|chaussure|chaussures|taille)\b/g,' ').replace(/\s+/g,' ').trim();if(w.length<3)return null;
+ let b=null,bd=9;for(const [n,k] of noms){const d=k.startsWith(w)&&w.length>=4?0:lev(w,k),lim=k.length<=4?1:2;if(d<=lim&&d<bd){bd=d;b=n}}return b}
+const KW={client:'cl',cliente:'cl',nom:'cl',monsieur:'cl',madame:'cl',telephone:'tel',tel:'tel',numero:'tel',quartier:'qr',secteur:'qr',livreur:'lv',livreuse:'lv',livre:'lv',par:'lv',moto:'vh',vehicule:'vh'};
+function lireVoix(t0){let t=' '+chiffres(nz(t0)).replace(/([a-z])(\d)/g,'$1 $2').replace(/(\d)([a-z])/g,'$1 $2')+' ';const o={items:[]};
+ for(const r of t.match(/\d[\d ]*\d/g)||[]){let d=r.replace(/\D/g,'');if(d.length>=11&&d.startsWith('226'))d=d.slice(3);
+  if(d.length>=8){o.tel=d.slice(-8).replace(/(\d\d)(?=\d)/g,'$1 ');const reste=d.slice(0,-8);t=t.replace(r,' '+reste+' ');break}}
+ if(/\bcyrus\b/.test(t))o.veh='cyrus';else if(/\belectrique\b/.test(t))o.veh='elec';else if(/\bperso\b/.test(t))o.veh='perso';
+ if(/\b(offert|offerte|gratuit|gratuite)\b/.test(t))o.fm='0';
+ const seg=[['it',[]]];for(const w of t.trim().split(' ')){const k=KW[w];if(k){if(seg[seg.length-1][0]!==k)seg.push([k,[]])}else seg[seg.length-1][1].push(w)}
+ const z={};for(const [k,ws] of seg)z[k]=((z[k]||'')+' '+ws.join(' ')).trim();
+ const zi=(z.it||'').replace(/\b(cyrus|electrique|perso|offert|offerte|gratuit|gratuite|livraison|bon|nouveau|commande|il|y|a)\b/g,' ');
+ for(let c of zi.split(/\b(?:et|plus|puis|avec|aussi)\b|\s\+\s/)){c=c.replace(/\s+/g,' ').trim();if(!c)continue;
+  const pt=(c.match(/\b([34]\d)\b/)||[])[1]||'',m=trouverModele(c),last=o.items[o.items.length-1];
+  if(m)o.items.push({a:m,p:pt});
+  else{const w=c.replace(/\d+/g,' ').replace(/\b(pointure|paire|paires|une|un|en)\b/g,' ').replace(/\s+/g,' ').trim();
+   if(w)o.items.push({a:cap(w),p:pt,inc:1});else if(pt&&last)o.items.push({a:last.a,p:pt,inc:last.inc})}}
+ if(z.cl){const n=z.cl.replace(/\d+/g,' ').replace(/\b(s|appelle|c|est|au|le|la|du|de|son|sa)\b/g,' ').replace(/\s+/g,' ').trim();if(n)o.cl=cap(n)}
+ if(z.qr){const q=qTrouver(z.qr);o.qr=q||cap(z.qr)}
+ if(z.lv){const ws=z.lv.split(' ').filter(w=>w&&!/^(la|le|l|c|est|sera|va|qui)$/.test(w));
+  const l=S.settings.livreurs.find(l=>{const ns=nz(l.nom).split(' ');return ws.some(w=>ns.includes(w)||(w.length>=4&&ns.some(x=>x.length>=4&&lev(w,x)<=1)))});
+  if(l)o.lv=l.id;else if(ws.length)o.livInc=cap(ws.slice(0,2).join(' '))}
+ return o}
+let voixTxt='',syncBon=()=>{};
+function remplirVoix(t){if(!t||!t.trim())return;syncBon();const o=lireVoix(t);
+ if(o.items.length)draft.items=o.items.map(i=>({a:i.a,p:i.p||'',x:''}));
+ if(o.tel)draft.tel=o.tel;if(o.cl)draft.cl=o.cl;if(o.qr)draft.qr=o.qr;if(o.veh)draft.veh=o.veh;if(o.fm)draft.fm=o.fm;
+ if(o.lv){draft.livreur=o.lv;draft.livInc=null}else if(o.livInc){draft.livreur=null;draft.livInc=o.livInc}
+ draft.voix=true;voixTxt=t;vBon();const m=$('#vx_m');if(m)m.innerHTML='<div class="note ok">Bon rempli. Vérifiez tout, complétez ce qui est en rouge, puis créez le bon.</div>'}
+function micro(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition,z=$('#vx_m');
+ if(!SR){z.innerHTML='<div class="note warn">Le micro de l\'appli ne marche pas sur ce téléphone : touchez la case ci-dessus, utilisez le micro 🎤 du clavier, puis « Remplir le bon ».</div>';$('#vx_t').focus();return}
+ const r=new SR();r.lang='fr-FR';r.interimResults=true;r.maxAlternatives=1;let fin='';
+ z.innerHTML='<div class="note">🎤 Je vous écoute… Parlez, puis attendez 2 secondes.</div>';
+ r.onresult=e=>{let t='';for(const x of e.results)t+=x[0].transcript;fin=t;const a=$('#vx_t');if(a)a.value=t};
+ r.onerror=e=>{z.innerHTML=`<div class="note bad">${e.error==='not-allowed'?'Micro refusé : autorisez le micro pour ce site.':e.error==='network'?'Pas d\'Internet : utilisez le micro du clavier, puis « Remplir le bon ».':'Rien entendu. Réessayez.'}</div>`};
+ r.onend=()=>{if(fin)remplirVoix(fin)};
+ try{r.start()}catch(e){}}
+function manques(){const m={};if(!draft.voix)return m;const cli=draft.type==='client';
+ if(!(draft.cl||'').trim())m.cl=1;if(cli&&!(draft.tel||'').trim())m.tel=1;if(!draft.livreur)m.liv=1;
+ draft.items.forEach((it,i)=>{if(!it.a.trim())m['a'+i]=1;if(!+it.x)m['x'+i]=1});
+ if(cli&&!parsePos(draft.pos)&&!qCoord(draft.qr))m.pos=1;return m}
+function rougir(){const M=manques(),t=(sel,k)=>{const e=$(sel);if(e)e.classList.toggle('miss',!!M[k])};
+ t('#f_cl','cl');t('#f_tel','tel');t('#f_pos','pos');t('#f_qr','pos');t('#lvz','liv');
+ draft.items.forEach((x,i)=>{t(`[data-ia="${i}"]`,'a'+i);t(`[data-ix="${i}"]`,'x'+i)});
+ const z=$('#manq');if(!z)return;const L=[M.cl&&'nom du client',M.tel&&'téléphone',M.liv&&'livreur',M.pos&&'localisation ou quartier',...draft.items.map((it,i)=>M['a'+i]?'modèle':M['x'+i]?'prix de '+(it.a||'?'):null)].filter(Boolean);
+ z.innerHTML=L.length?`<div class="note bad">À compléter : ${esc(L.join(', '))}.</div>`:(draft.voix?'<div class="note ok">Tout est rempli. Vérifiez, puis créez le bon.</div>':'')}
+function recapClient(){const z=$('#recap');if(!z)return;const fr=fraisBon(),art=totalItems(draft.items),tel=telNorm(draft.tel);
+ z.innerHTML=`<h3 style="margin-top:0">À payer par le client</h3><div class="liv"><span>Chaussures</span><b>${F(art)}</b></div><div class="liv"><span>Livraison</span><b>${fr==null?'selon la distance':fr===0?'offerte':F(fr)}</b></div>
+ <div class="liv" style="font-size:18px;margin-top:4px"><span>Total à la livraison</span><b>${F(art+(fr||0))}${fr==null?' + livraison':''}</b></div>
+ ${tel.length>=11&&art>0?`<a class="btn ok" href="${wa(tel,msgClient())}" target="_blank" rel="noopener">📲 Envoyer au client</a>`:'<p class="mut">Pour « Envoyer au client » : le téléphone du client et au moins un modèle avec son prix.</p>'}`}
+
 /* ===================== Vue : nouveau bon (boutique) ===================== */
 let draft={type:'client',livreur:null,veh:'cyrus',raison:'',items:[{a:'',p:'',x:''}],fm:'auto'};
 const totalItems=it=>it.reduce((a,i)=>a+(+i.x||0),0);
 function vBon(){
- const st=S.settings,g=st.gare;if(!draft.items||!draft.items.length)draft.items=[{a:'',p:'',x:''}];
+ const st=S.settings,g=st.gare;if(!draft.items||!draft.items.length)draft.items=[{a:'',p:'',x:''}];prixDraft();
  const shopWarn=st.shopOk?'':`<div class="note warn"><b>Position de la boutique approximative</b> (près de la Pédiatrie Charles de Gaulle). À faire une seule fois, debout dans la boutique :<button class="btn" id="fixShop">Je suis dans la boutique : enregistrer la position</button><div id="fsm"></div></div>`;
  const gare=draft.type==='gare';
  $('#app').innerHTML=`${shopWarn}
+ <div class="card" style="border:2px solid var(--navy)">
+  <button class="btn" id="mic" style="margin-top:0">🎤 Dicter le bon</button>
+  <p class="mut">Ex. : « Celio 42 et Retos 43, client 70 12 34 56, quartier Patte d'Oie, livreuse Ouoba »</p>
+  <textarea id="vx_t" style="min-height:56px" placeholder="Ce que l'appli a entendu (ou tapez, ou micro du clavier)">${esc(voixTxt)}</textarea>
+  <button class="btn sm ghost" id="vx_ok">Remplir le bon avec ce texte</button><div id="vx_m"></div></div>
  <div class="chips" style="margin-top:6px">
   <button class="chip ${!gare?'on':''}" data-ty="client">Livraison client</button>
   <button class="chip ${gare?'on':''}" data-ty="gare">Envoi province (gare)</button></div>
@@ -218,71 +343,90 @@ function vBon(){
   <label>${gare?'Destinataire (nom, ville)':'Nom du client'}</label><input id="f_cl" value="${esc(draft.cl||'')}">
   <label>Téléphone du client</label><input id="f_tel" inputmode="tel" value="${esc(draft.tel||'')}">
   <h3>Modèles qui sortent</h3>
-  ${draft.items.map((it,i)=>`<div class="row" style="margin-bottom:6px"><input data-ia="${i}" list="catl" placeholder="Modèle" value="${esc(it.a)}"><input data-ip="${i}" style="flex:.45" inputmode="numeric" placeholder="Pt." value="${esc(it.p)}"><input data-ix="${i}" style="flex:.7" inputmode="numeric" placeholder="Prix F" value="${esc(it.x)}">${draft.items.length>1?`<button class="btn sm ghost" style="flex:none;margin:0" data-del="${i}" aria-label="Retirer">✕</button>`:''}</div>`).join('')}
-  <datalist id="catl">${S.cat.map(c=>`<option value="${esc(c.n)}">${c.pv?F(c.pv):''}</option>`).join('')}</datalist>
+  ${draft.items.map((it,i)=>`<div class="row" style="margin-bottom:2px"><input data-ia="${i}" list="catl" placeholder="Modèle" value="${esc(it.a)}"><input data-ip="${i}" style="flex:.45" inputmode="numeric" placeholder="Pt." value="${esc(it.p)}"><input data-ix="${i}" style="flex:.7" inputmode="numeric" placeholder="Prix F" value="${esc(it.x)}">${draft.items.length>1?`<button class="btn sm ghost" style="flex:none;margin:0" data-del="${i}" aria-label="Retirer">✕</button>`:''}</div><div class="mut" data-ii="${i}" style="margin:0 0 8px"></div>`).join('')}
+  <datalist id="catl">${catNoms().map(n=>{const pb=prixBoutique(n);return `<option value="${esc(n)}">${pb?F(pb.pv):''}</option>`}).join('')}</datalist>
   <button class="btn sm ghost" id="addI">+ Ajouter un modèle</button>
+  <h3>Avantage client</h3><div class="chips">${[['non','Nouveau client'],['fidele',"⭐ Client fidèle / bon d'un ami"],['royal','👑 Client Royal']].map(([k,l])=>`<button class="chip ${(draft.fid||'non')===k?'on':''}" data-fd="${k}">${l}</button>`).join('')}</div><div id="fidInfo"></div>
+  <p class="mut">Mêmes prix et avantages qu'à la caisse : nouveau client, avantage dès la 2e paire ; client fidèle ou bon d'un ami, sur chaque paire. Rien sur les promos et accessoires. Le niveau se reconnaît tout seul avec le téléphone du client.</p>
   <div class="liv" style="margin-top:10px"><span>Total chaussures</span><b id="totI">${F(totalItems(draft.items))}</b></div>
   ${gare?`<div class="note">Envoi province : tout est payé avant le départ (chaussures + ${F(g.client)} d'envoi). Coût réel : gare ${F(g.ticket)} + société ${F(g.societe)}, la boutique complète ${F(g.ticket+g.societe-g.client)}.</div>`:
   `<h3>Frais de livraison</h3><div class="chips">${[['auto','Selon la distance'],['1000','1 000 F'],['1500','1 500 F'],['2000','2 000 F'],['0','Offert (bon client)']].map(([k,l])=>`<button class="chip ${String(draft.fm)===k?'on':''}" data-fm="${k}">${l}</button>`).join('')}</div>
-  <p class="mut">« Selon la distance » : l'appli du livreur calcule les frais à l'arrivée chez le client.</p>
-  <label>Position du client (lien WhatsApp ou Google Maps, facultatif)</label><input id="f_pos" placeholder="ex. https://maps.google.com/?q=12.37,-1.50" value="${esc(draft.pos||'')}">`}
-  <div id="estim"></div>
+  <p class="mut">« Selon la distance » : frais calculés avec la localisation (ou le quartier) et annoncés au client. Sans les deux, l'appli du livreur les calcule à l'arrivée.</p>`}
  </div>
- <h3>Qui livre ?</h3><div class="chips">${st.livreurs.map(l=>`<button class="chip ${draft.livreur===l.id?'on':''}" data-lv="${l.id}">${esc(l.nom)}</button>`).join('')}</div>
+ ${gare?'':`<div class="card loc"><h3>📍 Coller la localisation du client</h3>
+  <div class="row"><input id="f_pos" placeholder="Lien de position WhatsApp du client" value="${esc(draft.pos||'')}"><button class="btn sm" style="flex:none;margin:0" id="colle">Coller</button></div>
+  <label>Pas de localisation ? Quartier du client</label><input id="f_qr" list="qrl" placeholder="ex. Patte d'Oie" value="${esc(draft.qr||'')}">
+  <datalist id="qrl">${Object.keys(QUARTIERS).map(q=>`<option value="${esc(q)}">`).join('')}</datalist>
+  <div id="estim"></div></div>`}
+ <h3>Qui livre ?</h3><div class="chips" id="lvz">${st.livreurs.map(l=>`<button class="chip ${draft.livreur===l.id?'on':''}" data-lv="${l.id}">${esc(l.nom)}</button>`).join('')}</div>
+ ${draft.livInc?`<div class="note bad">« ${esc(draft.livInc)} » n'est pas dans la liste des livreurs.<br><button class="btn sm" id="addLv">Ajouter ${esc(draft.livInc)} aux livreurs</button></div>`:''}
  <h3>Avec quel véhicule ?</h3><div class="chips">${vehs().map(v=>`<button class="chip ${draft.veh===v.id?'on':''}" data-vh="${v.id}">${esc(v.nom)}${v.id==='elec'?' · '+Math.floor(kmRest())+' km':''}</button>`).join('')}</div>
  ${draft.veh==='perso'?`<label>Raison de la moto perso (obligatoire)</label><select id="f_rs"><option value="">— choisir —</option>${['Cyrus déjà en course','Batterie électrique déchargée','Panne','Autorisé par le Directeur'].map(r=>`<option ${draft.raison===r?'selected':''}>${r}</option>`).join('')}</select>`:''}
  <div id="batchk"></div>
+ ${gare?'':'<div class="card recap" id="recap"></div>'}
+ <div id="manq"></div>
  <button class="btn gold" id="go">Créer le bon et l'envoyer</button>
  ${gare?'':`<h3>Grille des frais (distance par la route)</h3><div class="card tbl"><table>${grille().map(([a,b])=>`<tr><td>${a}</td><td class="n"><b>${F(b)}</b></td></tr>`).join('')}</table></div>`}`;
  const sync=()=>{draft.cl=$('#f_cl').value;draft.tel=$('#f_tel').value;
-  document.querySelectorAll('[data-ia]').forEach(i=>{const it=draft.items[i.dataset.ia];const chg=it.a!==i.value;it.a=i.value;
-   const c=S.cat.find(c=>c.n.toLowerCase()===i.value.trim().toLowerCase());
-   if(chg&&c&&c.pv){it.x=String(c.pv);const px=document.querySelector(`[data-ix="${i.dataset.ia}"]`);if(px)px.value=it.x}});
+  document.querySelectorAll('[data-ia]').forEach(i=>{const it=draft.items[i.dataset.ia];if(it.a!==i.value){it.a=i.value;it.man=false}});
   document.querySelectorAll('[data-ip]').forEach(i=>draft.items[i.dataset.ip].p=i.value);
-  document.querySelectorAll('[data-ix]').forEach(i=>draft.items[i.dataset.ix].x=i.value);
+  document.querySelectorAll('[data-ix]').forEach(i=>{const it=draft.items[i.dataset.ix];if(String(it.x)!==i.value){it.x=i.value;it.man=i.value!==''}});
+  prixDraft();document.querySelectorAll('[data-ix]').forEach(i=>{const it=draft.items[i.dataset.ix];if(i.value!==String(it.x)&&document.activeElement!==i)i.value=it.x});infoItems();
   if($('#totI'))$('#totI').textContent=F(totalItems(draft.items));
-  if($('#f_pos'))draft.pos=$('#f_pos').value;if($('#f_rs'))draft.raison=$('#f_rs').value;estim()};
+  if($('#f_pos'))draft.pos=$('#f_pos').value;if($('#f_qr'))draft.qr=$('#f_qr').value;if($('#f_rs'))draft.raison=$('#f_rs').value;estim()};
+ syncBon=sync;
  document.querySelectorAll('#app input,#app select').forEach(i=>i.oninput=sync);
+ $('#vx_t').oninput=e=>{voixTxt=e.target.value};
+ $('#mic').onclick=micro;$('#vx_ok').onclick=()=>remplirVoix($('#vx_t').value);
+ document.querySelectorAll('[data-fd]').forEach(b=>b.onclick=()=>{sync();draft.fid=b.dataset.fd;draft.fidMan=true;draft.fidAuto=false;vBon()});
+ if($('#colle'))$('#colle').onclick=async()=>{try{const t=await navigator.clipboard.readText();if(!t)throw 0;$('#f_pos').value=t.trim();sync()}catch(e){alert('Collage automatique refusé : appui long dans la case, puis « Coller ».');$('#f_pos').focus()}};
+ if($('#addLv'))$('#addLv').onclick=()=>{sync();const n=draft.livInc;if(!n)return;if(!confirm(`Ajouter « ${n} » à la liste des livreurs ?`))return;const l={id:uid(),nom:n,tel:''};st.livreurs.push(l);save();draft.livreur=l.id;draft.livInc=null;vBon()};
  $('#addI').onclick=()=>{sync();draft.items.push({a:'',p:'',x:''});vBon()};
  document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{sync();draft.items.splice(+b.dataset.del,1);vBon()});
  document.querySelectorAll('[data-fm]').forEach(b=>b.onclick=()=>{sync();draft.fm=b.dataset.fm;vBon()});
  document.querySelectorAll('[data-ty]').forEach(b=>b.onclick=()=>{sync();draft.type=b.dataset.ty;vBon()});
- document.querySelectorAll('[data-lv]').forEach(b=>b.onclick=()=>{sync();draft.livreur=b.dataset.lv;vBon()});
+ document.querySelectorAll('[data-lv]').forEach(b=>b.onclick=()=>{sync();draft.livreur=b.dataset.lv;draft.livInc=null;vBon()});
  document.querySelectorAll('[data-vh]').forEach(b=>b.onclick=()=>{sync();draft.veh=b.dataset.vh;vBon()});
- $('#go').onclick=()=>{sync();creerBon()}; estim();
+ $('#go').onclick=()=>{sync();creerBon()}; infoItems(); estim();
  if($('#fixShop'))$('#fixShop').onclick=async()=>{$('#fsm').innerHTML='Prise du GPS…';try{const p=await gps();
   if(p[2]>60){$('#fsm').innerHTML=`GPS imprécis (± ${Math.round(p[2])} m). Sortez devant la boutique, attendez 1 minute et réessayez.`;return}
   st.shop=[p[0],p[1]];st.shopOk=true;save();vBon()}catch(e){$('#fsm').innerHTML='GPS refusé : activez la localisation et autorisez-la.'}};
 }
-function estim(){const p=parsePos(draft.pos),sh=S.settings.shop;let html='',chk=null;
- if(p&&sh&&draft.type==='client'){const k=route(sh,p);html=`<div class="note">Distance estimée : <b>${k.toFixed(1)} km</b> aller (${(2*k).toFixed(1)} km AR) · frais selon la grille : <b>${F(frais(k))}</b></div>`;chk=checkCourse(draft.veh,2*k)}
- else if(draft.pos&&!p)html=`<div class="note warn">Lien non reconnu : il faut un lien qui contient les coordonnées (ex. 12.3712,-1.5197).</div>`;
+function estim(){const p=parsePos(draft.pos),d=distEstim();let html='',chk=null;
+ if(d){html=`<div class="note ${d.src==='loc'?'ok':''}">${d.src==='loc'?'Distance':'Estimation par le quartier '+esc(d.nom)+' :'} <b>${km1(d.k)} km</b> aller par la route (${km1(2*d.k)} km AR) · frais : <b>${F(frais(d.k))}</b>${d.src==='qr'?'<br><span class="mut">Approximatif : la localisation du client est plus précise.</span>':''}</div>`;chk=checkCourse(draft.veh,2*d.k)}
+ if(draft.pos&&!p)html=`<div class="note warn">${/goo\.gl|maps\.app/i.test(draft.pos)?'Lien court Google Maps : l\'appli ne peut pas le lire. Demandez au client d\'envoyer sa position par WhatsApp (📎 puis Position), ou collez les chiffres (ex. 12.3712, -1.5197).':'Lien non reconnu : il faut un lien qui contient les coordonnées (ex. 12.3712,-1.5197).'}</div>`+html;
+ if(!p&&draft.qr&&!qCoord(draft.qr))html+=`<div class="note warn">Quartier « ${esc(draft.qr)} » inconnu : choisissez dans la liste ou collez la localisation.</div>`;
  if($('#estim'))$('#estim').innerHTML=html;
  if(!chk&&draft.veh==='elec'){const c=conseil();chk={c:c.c,t:`Batterie ${batMontee().ah} Ah : ${c.t}. ${c.d}`}}
- if($('#batchk'))$('#batchk').innerHTML=chk?`<div class="note ${chk.c}">${chk.t}</div>`:'';}
+ if($('#batchk'))$('#batchk').innerHTML=chk?`<div class="note ${chk.c}">${chk.t}</div>`:'';
+ recapClient();rougir();}
 function creerBon(){const st=S.settings;
- const items=draft.items.filter(i=>i.a.trim()||+i.x).map(i=>({a:i.a.trim()||'Modèle',p:i.p,x:+i.x||0}));
+ const items=draft.items.filter(i=>i.a.trim()||+i.x).map(i=>({a:i.a.trim()||'Modèle',p:i.p,x:+i.x||0,...(i.pn?{pn:i.pn}:{}),...(i.av&&!i.man?{av:i.av}:{})}));
  if(!draft.cl||!draft.livreur){alert('Il manque le client ou le livreur.');return}
  if(!items.length){alert('Ajoutez au moins un modèle avec son prix.');return}
  if(draft.veh==='perso'&&!draft.raison){alert('Choisissez la raison de la moto perso.');return}
  if(draft.veh==='elec'&&kmRest()<=10&&!confirm('Il reste 10 km ou moins sur la batterie. Envoyer quand même ?'))return;
- const gare=draft.type==='gare',fm=gare?'gare':draft.fm;
+ const gare=draft.type==='gare',dE=gare?null:distEstim();let fm=gare?'gare':draft.fm;
+ if(fm==='auto'&&dE)fm=String(frais(dE.k)); // frais annoncés au client = frais du bon
+ const msgCl=!gare&&telNorm(draft.tel).length>=11?msgClient():'';
  const L={id:uid(),type:draft.type,at:Date.now(),cl:draft.cl,tel:draft.tel,items,art:items.map(i=>i.a+(i.p?' ('+i.p+')':'')).join(', '),m:totalItems(items),fm,
-  livreur:draft.livreur,veh:draft.veh,raison:draft.raison,code:String(Math.floor(1000+Math.random()*9000)),
-  cpos:parsePos(draft.pos),statut:'en_cours',alertes:[],remis:false,retour:false,controle:Math.random()<1/(st.ctrl||5),cc:!!st.codeClient};
+  livreur:draft.livreur,livNom:liv(draft.livreur).nom,veh:draft.veh,raison:draft.raison,code:String(Math.floor(1000+Math.random()*9000)),
+  cpos:parsePos(draft.pos),qr:draft.qr||'',kmE:dE?+dE.k.toFixed(2):null,fa:draft.fm==='auto'&&dE?1:0,statut:'en_cours',alertes:[],remis:false,retour:false,controle:Math.random()<1/(st.ctrl||5),cc:!!st.codeClient};
  for(const it of items){const c=S.cat.find(x=>x.n.toLowerCase()===it.a.toLowerCase());
-  if(c&&!c.pv&&it.x){c.pv=it.x;S.catLog.unshift({at:Date.now(),n:c.n,av:null,ap:it.x,par:'appris sur un bon'})}
-  else if(!c&&it.x&&it.a!=='Modèle'){S.cat.push({id:uid(),n:it.a,pv:it.x,pa:null});S.catLog.unshift({at:Date.now(),n:it.a+' (nouveau)',av:null,ap:it.x,par:'appris sur un bon'})}}
+  const pv=it.pn||it.x;
+  if(c&&!c.pv&&pv){c.pv=pv;S.catLog.unshift({at:Date.now(),n:c.n,av:null,ap:pv,par:'appris sur un bon'})}
+  else if(!c&&pv&&it.a!=='Modèle'){S.cat.push({id:uid(),n:it.a,pv,pa:null});S.catLog.unshift({at:Date.now(),n:it.a+' (nouveau)',av:null,ap:pv,par:'appris sur un bon'})}}
  S.livs.unshift(L);save();
- const payload={cc:L.cc?1:0,i:L.id,y:L.type,c:L.cl,t:L.tel,it:items.map(i=>[i.a,i.p,i.x]),fm,tf:st.tarif,g:st.gare,l:liv(L.livreur).nom,v:vehNom(L.veh),s:st.shop,d:L.at,cp:L.cpos,w:st.waBoutique};
+ const payload={cc:L.cc?1:0,i:L.id,y:L.type,c:L.cl,t:L.tel,it:items.map(i=>[i.a,i.p,i.x]),fm,tf:st.tarif,g:st.gare,l:liv(L.livreur).nom,v:vehNom(L.veh),s:st.shop,d:L.at,cp:L.cpos,w:st.waBoutique,...(L.qr?{q:L.qr}:{})};
  const code='RCB:'+enc(payload);
  const lien=st.baseUrl?st.baseUrl.replace(/#.*$/,'')+'#'+code:'';
  const fr=gare?'Envoi déjà payé':fm==='auto'?'Livraison : selon la distance (l\'appli calcule)':+fm===0?'Livraison OFFERTE':'Livraison : '+F(+fm);
- const txt=`🛵 BON RC Elegance\n${gare?'Envoi province : ':'Client : '}${L.cl}${L.tel?' ('+L.tel+')':''}\n${items.map(i=>`• ${i.a}${i.p?' pt '+i.p:''} : ${F(i.x)}`).join('\n')}\n${fr}\nVéhicule : ${vehNom(L.veh)}\n\n${lien?'Ouvrir le bon : '+lien+'\n\n':''}Code du bon (à coller dans RC Livraison) :\n${code}`;
- draft={type:'client',livreur:draft.livreur,veh:draft.veh,raison:'',items:[{a:'',p:'',x:''}],fm:'auto'};
+ const txt=`🛵 BON RC Elegance\n${gare?'Envoi province : ':'Client : '}${L.cl}${L.tel?' ('+L.tel+')':''}\n${items.map(i=>`• ${i.a}${i.p?' pt '+i.p:''} : ${F(i.x)}`).join('\n')}\n${fr}\n${L.qr?'Quartier : '+L.qr+'\n':''}Véhicule : ${vehNom(L.veh)}\n\n${lien?'Ouvrir le bon : '+lien+'\n\n':''}Code du bon (à coller dans RC Livraison) :\n${code}`;
+ draft={type:'client',livreur:draft.livreur,veh:draft.veh,raison:'',items:[{a:'',p:'',x:''}],fm:'auto'};voixTxt='';
  $('#app').innerHTML=`<div class="note ok">Bon créé pour <b>${esc(L.cl)}</b> : ${items.length} modèle(s), ${F(L.m)}. Envoyez dans l'ordre :</div>
  <a class="btn" href="${wa(liv(L.livreur).tel,txt)}" target="_blank" rel="noopener">1. Envoyer le bon à ${esc(liv(L.livreur).nom)}</a>${btnSms(liv(L.livreur).tel,txt)}
  ${!gare&&L.cc&&L.tel?`<a class="btn gold" href="${wa(telNorm(L.tel),`Bonjour, votre commande RC Elegance est en route 🛵\nVotre code de livraison : ${L.code}\nDonnez ce code au livreur seulement quand vous avez vos chaussures en main. Merci !`)}" target="_blank" rel="noopener">2. Envoyer le code ${L.code} au client</a>${btnSms(telNorm(L.tel),'RC Elegance : votre code de livraison est '+L.code+'. Donnez-le au livreur seulement quand vous avez vos chaussures en main.')}`:(gare||!L.cc)?'':`<div class="note">Code client : <b>${L.code}</b> (à donner au client par téléphone).</div>`}
+ ${msgCl?`<a class="btn ghost" href="${wa(telNorm(L.tel),msgCl)}" target="_blank" rel="noopener">📲 Envoyer le récapitulatif au client</a>`:''}
  ${rappelVeh(L.veh,true)}<button class="btn ghost" id="nv">Nouveau bon</button>`;
  $('#nv').onclick=vBon;}
 function rappelVeh(v,shop){
@@ -338,6 +482,7 @@ function lireRetour(txt){const m=(txt||'').match(/RCR:([A-Za-z0-9_-]+)/);if(!m)r
  L.kmA=+kmA.toFixed(2);L.kmAR=+(2*kmA).toFixed(2);
  L.frais=L.type==='gare'?S.settings.gare.client:(r.f!=null?+r.f:frais(kmA));L.offert=L.type!=='gare'&&L.fm==='0'&&r.r!=='N';
  if(L.type==='client'&&L.fm==='auto'&&r.f!=null&&kmA&&Math.abs(r.f-frais(kmA))>=500)al.push(`Frais déclarés ${F(r.f)} au lieu de ${F(frais(kmA))} pour ${kmA.toFixed(1)} km.`);
+ const info=L.fa&&kmA&&L.type==='client'&&frais(kmA)!==+L.fm?`<div class="note">Info : frais annoncés au client ${F(+L.fm)} (estimation ${km1(L.kmE||0)} km). GPS du livreur : ${km1(kmA)} km, soit ${F(frais(kmA))} selon la grille.</div>`:'';
  if(L.veh==='perso')L.indem=Math.round(L.kmAR*S.settings.coutKm);
  L.cout=Math.round(L.kmAR*coutKmVeh(L.veh))+(L.type==='gare'?L.ticket:0);
  if(L.controle)al.push(`Appel de contrôle tiré au sort : appeler ${L.tel||'le client'} pour confirmer.`);
@@ -347,7 +492,7 @@ function lireRetour(txt){const m=(txt||'').match(/RCR:([A-Za-z0-9_-]+)/);if(!m)r
  const prev=S.livs.filter(x=>x.tel&&x.tel===L.tel&&x.statut==='pas_achete').length;
  save();
  const bm=L.veh==='elec'?(()=>{const c=conseil();return `<div class="note ${c.c}"><b>${c.t}</b> — ${c.d}</div>`})():'';
- return `<div class="note ${al.length?'warn':'ok'}">ok — ${esc(L.cl)} : ${({achete:'tout acheté',partiel:'acheté en partie',pas_achete:'rien acheté',depose:'déposé à la gare'})[L.statut]} · ${L.kmAR} km AR${L.type==='gare'?'':' · livraison '+(L.offert?'offerte':F(L.frais))}${al.length?' · '+al.length+' alerte(s)':''}</div>${L.type==='gare'?'':`<div class="note">Le livreur doit remettre <b>${F(L.encaisse)}</b>${L.rendre.length?' et rapporter : '+esc(L.rendre.join(', ')):''}.</div>`}${bm}${L.statut==='pas_achete'&&prev>=2?'<div class="note bad">Client à risque : 2e « pas acheté ». Exiger un paiement OM avant le prochain départ.</div>':''}${al.length?`<button class="btn bad" data-alr="1">Prévenir le Directeur maintenant</button>`:''}`}
+ return `<div class="note ${al.length?'warn':'ok'}">ok — ${esc(L.cl)} : ${({achete:'tout acheté',partiel:'acheté en partie',pas_achete:'rien acheté',depose:'déposé à la gare'})[L.statut]} · ${L.kmAR} km AR${L.type==='gare'?'':' · livraison '+(L.offert?'offerte':F(L.frais))}${al.length?' · '+al.length+' alerte(s)':''}</div>${L.type==='gare'?'':`<div class="note">Le livreur doit remettre <b>${F(L.encaisse)}</b>${L.rendre.length?' et rapporter : '+esc(L.rendre.join(', ')):''}.</div>`}${info}${bm}${L.statut==='pas_achete'&&prev>=2?'<div class="note bad">Client à risque : 2e « pas acheté ». Exiger un paiement OM avant le prochain départ.</div>':''}${al.length?`<button class="btn bad" data-alr="1">Prévenir le Directeur maintenant</button>`:''}`}
 
 /* ===================== Directeur à distance ===================== */
 async function packer(o){const json=JSON.stringify(o);
@@ -402,7 +547,7 @@ function vLivreuse(){
  const tot=B.it.reduce((a,x,i)=>a+(coche[i]?x[2]:0),0);
  const frLib=gare?'':B.fm==='auto'?'calculés à l\'arrivée':+B.fm===0?'OFFERTS (bon client)':F(+B.fm);
  $('#app').innerHTML=`<div class="card"><span class="tag">${gare?'Envoi province':'Livraison'} · ${esc(B.l)}</span>
- <div class="big" style="margin-top:6px">${esc(B.c)}</div><div class="mut">${esc(B.t||'')} · ${esc(B.v)}</div>
+ <div class="big" style="margin-top:6px">${esc(B.c)}</div><div class="mut">${esc(B.t||'')}${B.q?' · '+esc(B.q):''} · ${esc(B.v)}</div>
  ${B.t?`<a class="btn sm ghost" href="tel:${esc(B.t)}">Appeler le client</a>`:''}${B.cp?`<a class="btn sm ghost" href="https://www.google.com/maps/dir/?api=1&destination=${B.cp[0]},${B.cp[1]}" target="_blank" rel="noopener">Itinéraire</a>`:''}</div>
  ${gare?`<h2>À la gare</h2><div class="card">${B.it.map(x=>`<div class="liv"><span>${esc(x[0])} ${x[1]?'pt '+esc(x[1]):''}</span><b>${F(x[2])}</b></div>`).join('')}<p class="mut">Déjà payé par le client. Rien à encaisser.</p>
   <div class="row"><div><label>Ticket gare (F)</label><input id="tk" inputmode="numeric" value="${g.ticket}"></div><div><label>Société de livraison (F)</label><input id="so" inputmode="numeric" value="${g.societe}"></div></div>
