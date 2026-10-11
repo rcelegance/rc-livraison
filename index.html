@@ -35,6 +35,8 @@ textarea{min-height:80px}
 .btn{display:block;width:100%;border:0;border-radius:12px;padding:14px;font:700 16px Sora,sans-serif;margin-top:10px;background:var(--navy);color:#fff}
 :root[data-theme="dark"] .btn,.dk .btn{color:#0F1626}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn{color:#0F1626}}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn.ghost{color:var(--navy);border-color:var(--navy)}}
+:root[data-theme="dark"] .btn.ghost{color:var(--navy);border-color:var(--navy)}
 .btn.gold{background:var(--gold);color:#fff}.btn.ghost{background:none;border:1.5px solid var(--navy);color:var(--navy)}
 .btn.ok{background:var(--ok);color:#fff}.btn.warn{background:var(--warn);color:#fff}.btn.bad{background:var(--bad);color:#fff}
 .btn.sm{display:inline-block;width:auto;padding:8px 12px;font-size:13px;margin:6px 6px 0 0}
