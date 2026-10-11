@@ -839,6 +839,24 @@ function vReg(){const st=S.settings;
   if(hosted){if(!S.settings.baseUrl){S.settings.baseUrl=location.origin+location.pathname;save()}
    if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
    }}catch(e){}})();
+/* ===================== Installation simple (lien livreur) ===================== */
+// Lien à envoyer aux livreurs : https://rcelegance.github.io/rc-livraison/?livreur
+(function(){try{
+ const solo=matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+ if(/[?&]livreur/.test(location.search)&&!role&&!dir){role='livreuse';try{localStorage.setItem('rcliv_role',role)}catch(e){}tab='livreuse'}
+ if(solo)return;
+ const z=document.createElement('div');z.id='inst';
+ z.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:30;padding:12px 16px calc(14px + env(safe-area-inset-bottom,0px));background:var(--card);border-top:2px solid var(--gold);display:none';
+ document.body.appendChild(z);let ev=null;
+ const aide=()=>{const wv=/; wv\)|WhatsApp|FBAN|FBAV|Instagram/i.test(navigator.userAgent);
+  z.innerHTML=`<b style="color:var(--navy)">📲 Mettre RC Livraison sur l'écran</b><div class="mut" style="margin-top:4px">${wv?'Touchez ⋮ en haut à droite, puis « Ouvrir dans Chrome ». Le bouton Installer apparaîtra.':'Touchez ⋮ en haut à droite (ou le rond avec une flèche), puis « Ajouter à l\'écran d\'accueil », puis Installer.'}</div><button class="btn sm ghost" id="instX">Fermer</button>`;
+  z.style.display='block';$('#instX').onclick=()=>{z.style.display='none'}};
+ addEventListener('beforeinstallprompt',e=>{e.preventDefault();ev=e;
+  z.innerHTML=`<button class="btn gold" id="instGo" style="margin:0;font-size:18px">📲 Installer RC Livraison</button><div class="mut" style="text-align:center;margin-top:6px">Puis touchez « Installer » dans la fenêtre qui s'ouvre.</div>`;
+  z.style.display='block';$('#instGo').onclick=async()=>{ev.prompt();try{await ev.userChoice}catch(x){}ev=null;z.style.display='none'}});
+ addEventListener('appinstalled',()=>{z.style.display='none'});
+ if(/[?&]livreur/.test(location.search))setTimeout(()=>{if(!ev&&z.style.display==='none')aide()},4000);
+}catch(e){}})();
 (function(){const h=decodeURIComponent(location.hash||'');
  const b=h.match(/RCB:([A-Za-z0-9_-]+)/),r=h.match(/RCR:([A-Za-z0-9_-]+)/);
  if(b){try{bonRecu=dec(b[1]);tab='livreuse'}catch(e){}}
